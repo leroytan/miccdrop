@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, Animated } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, Animated, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
 
 const { width, height } = Dimensions.get('window');
 const AnimatedLinearGradient = Animated.createAnimatedComponent(LinearGradient);
@@ -15,6 +16,12 @@ const ProfilePage = () => {
       
     >
       <View style={styles.container}>
+      <Pressable style={styles.backButton} onPress={() => router.back()}>
+				<Image
+					source={require('../../assets/images/backIcon.png')}
+					style={styles.backIcon}
+				/>
+			</Pressable>
         <Image
           source={require('@/assets/images/profile_pic.jpeg')}
           style={styles.profileImage}
@@ -43,6 +50,24 @@ const ProfilePage = () => {
 };
 
 const styles = StyleSheet.create({
+  backButton: {
+		position: 'absolute',
+		top: 20,
+		left: 20,
+		zIndex: 1,
+		backgroundColor: '#ffffff',
+		borderRadius: 15,
+		padding: 10,
+		shadowColor: '#000',
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.2,
+		shadowRadius: 4,
+	},
+	backIcon: {
+		width: 20,
+		height: 20,
+		tintColor: '#344e76',
+	},
   background: {
     flex: 1,
   },
