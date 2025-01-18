@@ -33,7 +33,14 @@ export default function LoginScreen() {
         onChangeText={setPassword}
         secureTextEntry
       />
+      <View style={styles.buttonContainer}>
+        <View style={styles.button}>
       <Button title="Login" onPress={handleLogin} />
+        </View>
+        <View style={styles.button}>
+      <Button title="Sign up" onPress={handleLogin} />
+        </View>
+      </View>
     </ThemedView>
   );
 }
@@ -61,4 +68,17 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderRadius: 4,
   },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 20,
+  },
+  button: {
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 20,
+    flexDirection: "row",
+    alignItems: "center",
+  }
 });
