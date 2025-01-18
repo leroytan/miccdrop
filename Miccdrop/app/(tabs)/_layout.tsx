@@ -31,6 +31,7 @@ export default function StackLayout() {
         name="profile"
         options={{
           title: 'Profile',
+          headerShown: false,
           headerStyle: {
             backgroundColor: Colors[colorScheme ?? 'light'].background,
           },
