@@ -82,7 +82,7 @@ const SongItem = ({ item }: { item: Track }) => (
             params: { song: JSON.stringify(item) }, // Pass parameters here
           })}>
       <Image
-        source={require('C:/Users/ansel/miccdrop/Miccdrop/assets/images/playIcon.png')}
+        source={require('../assets/images/playIcon.png')}
         style={{ width: 40, height: 40 }}
       />
     </Pressable>
