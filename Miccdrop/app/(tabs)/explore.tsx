@@ -9,13 +9,19 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Animated } from "react-native";
+import { Pressable } from "react-native-gesture-handler";
+import { Link } from "expo-router";
 const { width, height } = Dimensions.get("window");
 const AnimatedLinearGradient =
   Animated.createAnimatedComponent<any>(LinearGradient);
-const Card = ({ title, imageSource }: any) => {
+
+const Card = ({ title, imageSource, href }: any) => {
   return (
     <View style={styles.card}>
-      <Image source={imageSource} style={styles.cardImage} />
+      <Link href={href} style={styles.cardImage}>
+          <Image source={imageSource} style={styles.cardImage} />
+          <Text>{title}</Text>
+      </Link>
     </View>
   );
 };
@@ -42,20 +48,25 @@ const App = () => {
         <View style={styles.verticalCardsLayout}>
           {/* Top and Trending Row */}
           <View style={styles.horizontalRowLayout}>
+            {/* Top Picks Card */}
             <Card
               title="Top Picks"
               imageSource={require("@/assets/images/topSongs.jpg")}
+              href="/songSelector"
             />
+            {/* Trending Now Card */}
             <Card
               title="Trending Now"
               imageSource={require("@/assets/images/trendingSongs.jpg")}
+              href="/songSelector"
             />
           </View>
-          {/* Recents */}
+          {/* Recents Card */}
           <View style={styles.fullWidthCard}>
             <Card
               title="Recents"
               imageSource={require("@/assets/images/recentSongs.jpg")}
+              href="/songSelector"
             />
           </View>
         </View>
