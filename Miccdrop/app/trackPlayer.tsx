@@ -8,15 +8,18 @@ import { DieWithASmile } from "../assets/lyrics/Die With A Smile"
 import { useSearchParams } from "expo-router/build/hooks";
 import { hello } from "@/assets/lyrics/Hello";
 import { router } from "expo-router";
+import * as FileSystem from 'expo-file-system';
+import AudioPlayer from "./AudioPlayer";
+import PitchGraph from "./pitchGraph";
 
 function trackPlayer() {
 	const [lyrics, setLyrics] = useState<string>("");
 	const searchParams = useSearchParams(); // Retrieve parameters from the route
 	const song = searchParams.get('song'); // Use get method to retrieve the song parameter
 	const songName = song ? JSON.parse(song).name : null;
-	const songId = song ? JSON.parse(song).id : null;
-	console.log(songName);
-	console.log(songId);
+	const songId : string = song ? JSON.parse(song).id : "";
+	// console.log(songName);
+	// console.log(songId);
 
 	const {
 		currentMillisecond,
@@ -31,7 +34,7 @@ function trackPlayer() {
 	useEffect(() => {
 		const loadLrcFile = async () => {
 			try {
-				const response = await fetch(`/lyrics/${songId}.lrc`);
+				const response = await fetch(`@/assets/lyrics/1GEBsLDvJGw7kviySRI6GX.lrc`);
 				// Check if the response is okay
 				if (!response.ok) {
 					throw new Error(`Failed to fetch .lrc file: ${response.statusText}`);
@@ -57,8 +60,14 @@ function trackPlayer() {
 		[]
 	);
 
+	const newPitch = Array.from({ length: 10 }, () => ({
+		pitch: 300,
+		clarity: 100,
+	  }));
+
 	return (
 		<Root style={{ backgroundColor: "white" }}>
+			<AudioPlayer songID = {songId}/>
 			<Control
 				onPlay={play}
 				onPause={pause}
