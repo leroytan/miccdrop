@@ -8,25 +8,37 @@ type Song = {
   song_name: string;
   spotify_id: string;
   lyrics_url: string;
+  image_url: string;
+  artist: string;
 };
 
 const SongItem = ({ item }: { item: Song }) => (
-  <View key={item.spotify_id} style={styles.songItem}>
-    <View>
-      <Text style={styles.songName}>{item.song_name}</Text>
-=    </View>
-    <Pressable
-      onPress={() =>
-        router.push({
-          pathname: '/trackPlayer',
-          params: { spotify_id: item.spotify_id }, // Pass song data as parameters
-        })
-      }
-    >
-      <Text style={styles.playButton}>Play</Text>
-    </Pressable>
-  </View>
+	<View key={item.spotify_id} style={styles.songItem}>
+		<Image
+			source={{ uri: item.image_url }}
+			style={styles.albumCover}
+		/>
+		<View style={styles.songInfo}>
+			<Text style={styles.songName}>{item.song_name}</Text>
+			<Text style={styles.artistName}>{item.artist}</Text>
+		</View>
+		<Pressable
+			style={styles.playButton}
+			onPress={() =>
+				router.push({
+					pathname: '/trackPlayer',
+					params: { song: JSON.stringify(item) },
+				})
+			}
+		>
+			<Image
+				source={require('../assets/images/playIcon.png')}
+				style={styles.playIcon}
+			/>
+		</Pressable>
+	</View>
 );
+
 
 function SongScroller() {
   const [query, setQuery] = useState('');
