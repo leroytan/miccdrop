@@ -6,10 +6,11 @@ import {
   Image,
   TouchableOpacity,
   Dimensions,
+  Pressable,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Animated } from "react-native";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 const { width, height } = Dimensions.get("window");
 const AnimatedLinearGradient =
   Animated.createAnimatedComponent<any>(LinearGradient);
@@ -38,11 +39,10 @@ const App = () => {
         {/* Level and Settings */}
         <View style={styles.topBar}>
           <View style={styles.levelIndicator}>
+            <Pressable onPress={() => router.push('/(tabs)/profile')}>
             <Text style={styles.levelText}>Level 8</Text>
+            </Pressable>
           </View>
-          <TouchableOpacity>
-            <Text style={styles.settingsIcon}>⚙️</Text>
-          </TouchableOpacity>
         </View>
         <View style={styles.verticalCardsLayout}>
           {/* Top and Trending Row */}
@@ -117,10 +117,6 @@ const styles = StyleSheet.create({
   levelText: {
     fontSize: 16,
     fontWeight: "bold",
-  },
-  settingsIcon: {
-    fontSize: 24,
-    color: "#fff",
   },
   card: {
     backgroundColor: "#fff",
