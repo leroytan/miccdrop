@@ -1,13 +1,5 @@
 import React from 'react';
-import styled from 'styled-components';
-
-const Style = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 20px;
-  background: rgb(222 222 222);
-`;
+import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 
 function Control({
   onPlay,
@@ -25,26 +17,57 @@ function Control({
   recoverAutoScrollImmediately: () => void;
 }) {
   return (
-    <Style>
-      <button type="button" onClick={onPlay}>
-        play
-      </button>
-      <button type="button" onClick={onPause}>
-        pause
-      </button>
-      <button type="button" onClick={onReset}>
-        reset
-      </button>
-      <input
-        type="number"
-        value={current}
-        onChange={(event) => setCurrent(Number(event.target.value))}
+    <View style={styles.container}>
+      <TouchableOpacity onPress={onPlay} style={styles.button}>
+        <Text style={styles.buttonText}>Play</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={onPause} style={styles.button}>
+        <Text style={styles.buttonText}>Pause</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={onReset} style={styles.button}>
+        <Text style={styles.buttonText}>Reset</Text>
+      </TouchableOpacity>
+      <TextInput
+        style={styles.input}
+        keyboardType="numeric"
+        value={current.toString()}
+        onChangeText={(text) => setCurrent(Number(text))}
       />
-      <button type="button" onClick={recoverAutoScrollImmediately}>
-        recover auto scroll immediately
-      </button>
-    </Style>
+      <TouchableOpacity onPress={recoverAutoScrollImmediately} style={styles.button}>
+        <Text style={styles.buttonText}>Recover Auto Scroll</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10, // Only works in React Native 0.71+. For older versions, use margins.
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    backgroundColor: '#dedede',
+  },
+  button: {
+    backgroundColor: '#007bff',
+    padding: 10,
+    borderRadius: 5,
+    marginHorizontal: 5,
+  },
+  buttonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    padding: 10,
+    borderRadius: 5,
+    width: 60,
+    textAlign: 'center',
+  },
+});
 
 export default Control;
