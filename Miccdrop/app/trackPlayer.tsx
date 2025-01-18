@@ -20,9 +20,7 @@ function TrackPlayer() {
     reset,
     play,
     pause,
-  } = useTimer(4);
-
-  const { signal, recoverAutoScrollImmediately } = useRecoverAutoScrollImmediately();
+  } = useTimer(10);
 
   useEffect(() => {
     const loadLrcFile = async () => {
@@ -46,11 +44,9 @@ function TrackPlayer() {
     loadLrcFile();
   }, [songId]);
 
-  const lineRenderer = useCallback(
-    ({ active, line: { content } }: { active: boolean; line: LrcLine }) => (
-      <Text style={[styles.line, active && styles.activeLine]}>{content}</Text>
-    ),
-    []
+
+  const lineRenderer = ({ active, line: { content } }: { active: boolean; line: LrcLine }) => (
+    <Text style={[styles.line, active && styles.activeLine]}>{content}</Text>
   );
 
   return (
@@ -68,7 +64,6 @@ function TrackPlayer() {
           lineRenderer={lineRenderer}
           currentMillisecond={currentMillisecond}
           verticalSpace
-          recoverAutoScrollSingal={signal}
           recoverAutoScrollInterval={5000}
         />
       </ScrollView>
