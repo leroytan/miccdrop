@@ -38,7 +38,7 @@ function TrackPlayer() {
       try {
         // Fetch song details from the backend
         const response = await fetch(
-          `http://localhost:3001/api/v1/getSongWithId?id=${spotifyId}`
+          `http://${process.env.EXPO_PUBLIC_LOCALHOST}:3001/api/v1/getSongWithId?id=${spotifyId}`
         );
   
         if (!response.ok) {

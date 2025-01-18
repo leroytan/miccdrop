@@ -6,7 +6,7 @@ const LyricComponent = ({ lrc, currentTime } :any) => {
   const lineRenderer = useCallback(
     ({ lrcLine: { millisecond, content }, index, active } : any) => (
       <Text
-        style={{ textAlign: 'center', color: active ? 'white' : 'gray' }}>
+        style={{ textAlign: 'center', color: active ? 'green' : 'gray' }}>
         {content}
       </Text>
     ),

@@ -49,7 +49,7 @@ function SongScroller() {
   const fetchSongs = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:3001/api/v1/getAllSongs`, {
+      const response = await fetch(`http://${process.env.EXPO_PUBLIC_LOCALHOST}:3001/api/v1/getAllSongs`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
