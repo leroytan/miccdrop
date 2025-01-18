@@ -11,6 +11,7 @@
   import { RecordingConfig } from "@siteed/expo-audio-stream";
   import PitchGraph from "./pitchGraph";
 import { Slider } from "@rneui/themed";
+import { parse } from "papaparse";
   export const SAMPLE_RATE = 16000
   const AUDIO_CHUNK_LENGTH = SAMPLE_RATE * 0.01
   const MAX_POINTS = 300
@@ -41,10 +42,21 @@ import { Slider } from "@rneui/themed";
         initializeSound()
         const loadCSV = async () => {
           try {
-            const parsedData = await parseCSV(songID); // Assuming parseCSV returns a Promise
-            setCorrectPitchData(parsedData);
-          } catch (error) {
-            console.error("Error parsing CSV:", error);
+            // Fetch song details from the backend
+            const response = await fetch(
+              `http://localhost:3001/api/v1/getPitch?id=${songID}`
+            );
+      
+            if (!response.ok) {
+              throw new Error(`Failed to fetch song pitch: ${response.statusText}`);
+            }
+    
+            const pitchContent = await response.text(); // Retrieve plain text content
+            console.log(pitchContent)
+            const parsed = await parseCSV(pitchContent)
+            setCorrectPitchData(parsed); // Set the lyrics state with the content
+            } catch (error) {
+            console.error("Error loading pitch file:", error);
           }
         };
 

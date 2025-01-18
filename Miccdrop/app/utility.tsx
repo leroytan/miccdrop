@@ -1,10 +1,7 @@
-import React, { SetStateAction} from 'react';
+
 import { Audio } from 'expo-av';
-import * as FileSystem from 'expo-file-system';
 import { PitchData } from '../types/pitchData';
-import * as fs from "fs"
-import * as Papa from 'papaparse';
-import { Platform } from 'react-native';
+import * as Papa from "papaparse"
 
 
 export const askPermission = async () => {
@@ -42,53 +39,25 @@ export const askPermission = async () => {
 
   
 
-  export async function parseCSV(songID: string): Promise<PitchData[]>  {
+  export async function parseCSV(fileContent  :any): Promise<PitchData[]>  {
     try {
-    //   // Read the file as text using expo-file-system
-    //   let fileContent = "";
-    //   const filePath = `${FileSystem.documentDirectory}/assets/data/1GEBsLDvJGw7kviySRI6GX.csv`
-    //   // const filePath = `/assets/pitches/${songID}.csv`;
-    //   if (Platform.OS === 'web') {
-    //     // Web: Use FileReader to read the file
-    //     const response = await fetch(filePath);
-    //     if (!response.ok) {
-    //       throw new Error(`Failed to fetch file: ${response.statusText}`);
-    //     }
-    //     fileContent = await response.text();
-    //   } else {
-    //     // Mobile: Use expo-file-system to read the file
-        
-    // // Read the file as text
-    //     fileContent = await FileSystem.readAsStringAsync(filePath);
-    //   }
-  
-      // // Parse CSV data
-      // const parsedData: PitchData[] = [];
-      // Papa.parse(fileContent, {
-      //   header: true,
-      //   skipEmptyLines: true,
-      //   dynamicTyping: true,
-      //   complete: (result) => {
-      //     result.data.forEach((row: any) => {
-      //       parsedData.push({
-      //         time: row['Time (ms)'],
-      //         pitch: row['Pitch (Hz)'],
-      //         clarity: row['Clarity'],
-      //       });
-      //     });
-      //   },
-      // });
-      //dummy
+    
+      // Parse CSV data
       const parsedData: PitchData[] = [];
-      let currentPitch = Math.floor(Math.random() * (500 - 260 + 1)) + 260;
-
-      for (let i = 0; i < 300; i++) {
-        // Change pitch every 10 elements (representing 0.1 seconds)
-        if (i % 10 === 0) {
-          currentPitch = Math.floor(Math.random() * (500 - 260 + 1)) + 260;
-        }
-        parsedData.push({ pitch: currentPitch, clarity: 100 });
-      }
+      Papa.parse(fileContent, {
+        header: true,
+        skipEmptyLines: true,
+        dynamicTyping: true,
+        complete: (result) => {
+          result.data.forEach((row: any) => {
+            parsedData.push({
+              time: row['Time (ms)'],
+              pitch: row['Pitch (Hz)'],
+              clarity: row['Clarity'],
+            });
+          });
+        },
+      });
 
       return parsedData;
     } catch (error) {
