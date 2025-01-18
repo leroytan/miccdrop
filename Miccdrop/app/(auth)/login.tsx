@@ -27,7 +27,7 @@ export default function LoginScreen() {
 
   const handleDefaultSignIn = async () => {
     try {
-      const results = await fetch(`http://172.31.27.63:3001/api/v1/signInDefault`, {
+      const results = await fetch(`http://localhost:3001/api/v1/signInDefault`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

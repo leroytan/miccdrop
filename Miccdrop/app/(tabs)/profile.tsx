@@ -41,7 +41,7 @@ const ProfilePage = () => {
         <LinearGradient colors={['#f04be5', '#FFB6B6']} start={[0, 0]}
         end={[1, 2]} style={styles.editButton}>
         <TouchableOpacity>
-          <Text style={styles.editButtonText}>Edit Profile</Text>
+          <Text style={styles.editButtonText}>Log Out</Text>
         </TouchableOpacity>
         </LinearGradient>
       </View>
