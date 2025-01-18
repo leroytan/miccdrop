@@ -8,14 +8,14 @@ type Song = {
   song_name: string;
   spotify_id: string;
   lyrics_url: string;
-  image_url: string;
+  images: string;
   artist: string;
 };
 
 const SongItem = ({ item }: { item: Song }) => (
 	<View key={item.spotify_id} style={styles.songItem}>
 		<Image
-			source={{ uri: item.image_url }}
+			source={{ uri: item.images }}
 			style={styles.albumCover}
 		/>
 		<View style={styles.songInfo}>
@@ -49,7 +49,7 @@ function SongScroller() {
   const fetchSongs = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`http://${process.env.EXPO_PUBLIC_LOCALHOST}:3001/api/v1/getAllSongs`, {
+      const response = await fetch(`http://localhost:3001/api/v1/getAllSongs`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

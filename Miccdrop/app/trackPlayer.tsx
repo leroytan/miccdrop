@@ -11,7 +11,13 @@ import LyricComponent from "./LyricComponent";
 
 function TrackPlayer() {
   const [lyrics, setLyrics] = useState<string>("");
-  
+  const searchParams = useSearchParams(); // Extract the query parameters
+  const songParam = searchParams.get("song"); // Get the song parameter
+  const song = songParam ? JSON.parse(songParam) : null; // Parse the JSON string
+
+
+  const { spotify_id: spotifyId, song_name, artist } = song; // Destructure the song object
+
 
   const {
     currentMillisecond,
@@ -21,9 +27,6 @@ function TrackPlayer() {
     pause,
   } = useTimer(10);
 
-
-  const searchParams = useSearchParams();
-  const spotifyId = searchParams.get("spotify_id"); // Retrieve spotify_id parameter
   
   useEffect(() => {
     const loadLrcFile = async () => {
@@ -35,7 +38,7 @@ function TrackPlayer() {
       try {
         // Fetch song details from the backend
         const response = await fetch(
-          `http://${process.env.EXPO_PUBLIC_LOCALHOST}:3001/api/v1/getSongWithId?id=${spotifyId}`
+          `http://localhost:3001/api/v1/getSongWithId?id=${spotifyId}`
         );
   
         if (!response.ok) {
@@ -55,6 +58,7 @@ function TrackPlayer() {
 
 
   const lineRenderer = ({ active, line: { content } }: { active: boolean; line: LrcLine }) => (
+
     <Text style={[styles.line, active && styles.activeLine]}>{content}</Text>
 
   );
