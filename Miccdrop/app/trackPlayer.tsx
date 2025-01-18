@@ -1,18 +1,22 @@
 import React, { CSSProperties, useCallback, useEffect, useState } from "react";
 import styled, { css } from "styled-components";
+import { Pressable, Text } from "react-native";
 import { Lrc, LrcLine, useRecoverAutoScrollImmediately } from "react-lrc";
 import useTimer from "../components/useTimer";
 import Control from "../components/control";
 import { DieWithASmile } from "../assets/lyrics/Die With A Smile"
 import { useSearchParams } from "expo-router/build/hooks";
-import { goodLuckBabe } from "@/assets/lyrics/01. Good Luck, Babe!";
+import { hello } from "@/assets/lyrics/Hello";
+import { router } from "expo-router";
 
-function App() {
+function trackPlayer() {
 	const [lyrics, setLyrics] = useState<string>("");
 	const searchParams = useSearchParams(); // Retrieve parameters from the route
 	const song = searchParams.get('song'); // Use get method to retrieve the song parameter
 	const songName = song ? JSON.parse(song).name : null;
 	const songId = song ? JSON.parse(song).id : null;
+	console.log(songName);
+	console.log(songId);
 
 	const {
 		currentMillisecond,
@@ -27,8 +31,17 @@ function App() {
 	useEffect(() => {
 		const loadLrcFile = async () => {
 			try {
-				setLyrics(goodLuckBabe);
+				const response = await fetch(`/lyrics/${songId}.lrc`);
+				// Check if the response is okay
+				if (!response.ok) {
+					throw new Error(`Failed to fetch .lrc file: ${response.statusText}`);
+				}
 
+				// Parse the .lrc file as text
+				const lrcContent = await response.text();
+
+				// Set the lyrics state with the fetched content
+				setLyrics(lrcContent);
 			} catch (error) {
 				console.error("Error loading LRC file:", error);
 			}
@@ -63,6 +76,21 @@ function App() {
 				recoverAutoScrollSingal={signal}
 				recoverAutoScrollInterval={5000}
 			/>
+			<Pressable onPress={() =>
+				// Navigate to the results page with the song parameter and score! Placeholder
+				router.push({
+					pathname: '/results',
+					params: { song: JSON.stringify(song), score: 3700 },
+				})}>
+				<Text style={
+					{
+						color: "blue",
+						textAlign: "center",
+						fontSize: 16,
+						margin: 10,
+					}
+				}>Result</Text>
+			</Pressable>
 		</Root>
 	);
 }
@@ -96,4 +124,4 @@ const Line = styled.div<{ active: boolean }>`
   `}
 `;
 
-export default App;
+export default trackPlayer;
