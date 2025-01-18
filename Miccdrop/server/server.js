@@ -306,7 +306,6 @@ app.get("/api/v1/getSongWithId", async (req, res) => {
       });
     }
 
-    // Fetch the .lrc file content from the lyrics_url
     const lrcResponse = await fetch(data.lyrics_url);
     if (!lrcResponse.ok) {
       throw new Error(`Failed to fetch LRC file: ${lrcResponse.statusText}`);
@@ -314,10 +313,118 @@ app.get("/api/v1/getSongWithId", async (req, res) => {
 
     const lrcContent = await lrcResponse.text();
 
-    // Return the LRC file content
     return res.status(200).send(lrcContent);
   } catch (err) {
     console.error("Unexpected error fetching song:", err);
+    return res.status(500).json({
+      status: "error",
+      message: "An unexpected error occurred.",
+    });
+  }
+});
+
+
+
+//Pitch detection API
+
+const linkPitchToSong = async () => {
+  const bucketName = "pitches"; // Replace with your bucket name
+
+  try {
+    console.log("Linking pitches to songs...");
+    const { data: files, error: listError } = await supabaseServiceRole.storage
+      .from(bucketName)
+      .list();
+    console.log(files)
+    if (listError) {
+      console.error("Error listing files in bucket:", listError);
+      return; // Exit the function on error
+    }
+
+    for (const file of files) {
+      const fileName = file.name; 
+      const spotifyId = fileName.replace(".csv", ""); 
+
+      const { data: publicUrlData, error: urlError } = supabaseServiceRole.storage
+        .from(bucketName)
+        .getPublicUrl(fileName);
+
+      if (urlError) {
+        console.error(`Error generating URL for file ${fileName}:`, urlError);
+        continue;
+      }
+
+      // Update the songs table with the lyrics URL
+      const { error: updateError } = await supabase
+        .from("songs")
+        .update({ pitch_url: publicUrlData.publicUrl })
+        .eq("spotify_id", spotifyId); 
+
+      if (updateError) {
+        console.error(
+          `Error updating song with Spotify ID ${spotifyId}:`,
+          updateError
+        );
+        continue;
+      }
+
+      console.log(`Updated song with Spotify ID ${spotifyId} successfully.`);
+    }
+
+    console.log("Pitches successfully linked to songs.");
+  } catch (err) {
+    console.error("Error linking pitches to songs:", err);
+  }
+};
+linkPitchToSong();
+
+
+
+app.post("/api/v1/getPitch", async (req, res) => {
+  const { id } = req.query; // Extract 'id' from the query parameters
+
+  if (!id) {
+    return res.status(400).json({
+      status: "error",
+      message: "Spotify ID is required.",
+    });
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from("songs")
+      .select("pitch_url") // Only fetch the `pitch_url` field
+      .eq("spotify_id", id)
+      .single();
+
+    if (error) {
+      console.error("Error fetching song:", error);
+      return res.status(500).json({
+        status: "error",
+        message: "An error occurred while fetching the song.",
+      });
+    }
+
+    if (!data || !data.pitch_url) {
+      return res.status(404).json({
+        status: "error",
+        message: "CSV file not found for the given song.",
+      });
+    }
+
+    // Fetch the CSV file from the provided URL
+    const csvResponse = await fetch(data.pitch_url);
+    if (!csvResponse.ok) {
+      throw new Error(`Failed to fetch CSV file: ${csvResponse.statusText}`);
+    }
+
+    const csvContent = await csvResponse.text(); // Read the CSV as plain text
+
+    // Send the CSV content with the appropriate headers
+    res.setHeader("Content-Type", "text/csv");
+    return res.status(200).send(csvContent);
+  } catch (err) {
+    console.error("Unexpected error fetching CSV:", err);
     return res.status(500).json({
       status: "error",
       message: "An unexpected error occurred.",
