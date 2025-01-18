@@ -28,7 +28,6 @@ const App = () => {
         style={styles.background}
         start={[0, 0]}
         end={[1, 1]}
-        location={[0.25, 0.4, 1]}
       />
       <View style={styles.container}>
         {/* Level and Settings */}
