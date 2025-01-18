@@ -10,8 +10,11 @@
   import {PitchDetector} from "pitchy"
   import { RecordingConfig } from "@siteed/expo-audio-stream";
   import PitchGraph from "./pitchGraph";
-import { Slider } from "@rneui/themed";
-import { parse } from "papaparse";
+  import { Slider } from "@rneui/themed";
+  import { parse } from "papaparse";
+
+
+
   export const SAMPLE_RATE = 16000
   const AUDIO_CHUNK_LENGTH = SAMPLE_RATE * 0.01
   const MAX_POINTS = 300
@@ -23,9 +26,10 @@ import { parse } from "papaparse";
     const [instrumental, setInstrumental] = useState<any>();
     const [currentPitch, setCurrentPitch] = useState<PitchData | null>(null); // Store detected pitch
     const [acapellaChunk, setAcapellaChunk] = useState<PitchData[]>([]);
-    const [correctPitchData, setCorrectPitchData] = useState<PitchData[]>([]);
-    const [currentAudioChunk, setCurrentAudioChunk] = useState(0);
+    //const [correctPitchData, setCorrectPitchData] = useState<PitchData[]>([]);
+    let correctPitchData : PitchData[] = [];
     const [instrumentalLoaded, setInstrumentalLoaded] = useState(false);
+    let currentAudioChunkIndex = 0;
 	const [volume, setVolume] = useState(0.5); // Default volume (1.0 is max)
 
     useEffect(() => {
@@ -44,7 +48,13 @@ import { parse } from "papaparse";
           try {
             // Fetch song details from the backend
             const response = await fetch(
-              `http://localhost:3001/api/v1/getPitch?id=${songID}`
+              `http://localhost:3001/api/v1/getPitch?id=${songID}`,
+              {
+                method: 'POST', // Specify the method
+                headers: {
+                  'Content-Type': 'application/json', 
+                },
+              }
             );
       
             if (!response.ok) {
@@ -52,9 +62,9 @@ import { parse } from "papaparse";
             }
     
             const pitchContent = await response.text(); // Retrieve plain text content
-            console.log(pitchContent)
             const parsed = await parseCSV(pitchContent)
-            setCorrectPitchData(parsed); // Set the lyrics state with the content
+            correctPitchData = parsed;
+            
             } catch (error) {
             console.error("Error loading pitch file:", error);
           }
@@ -88,7 +98,7 @@ import { parse } from "papaparse";
     const onAudioData = useCallback(async (event: AudioDataEvent) => {
       try {
           let { data, position, eventDataSize } = event;
-          setCurrentAudioChunk(currentAudioChunk + 1);
+          currentAudioChunkIndex = currentAudioChunkIndex + 1;
           if (eventDataSize === 0) {
               console.warn(`Invalid data size=${eventDataSize}`);
               return;
@@ -115,8 +125,9 @@ import { parse } from "papaparse";
               } else {
                 setCurrentPitch({"pitch" : 0, "clarity" : 0});     
               }
-              setAcapellaChunk(MAX_POINTS >= currentAudioChunk ? correctPitchData.slice(0, currentAudioChunk + 1) : correctPitchData.slice(-MAX_POINTS))
-              console.log(acapellaChunk)
+              const parsedData = correctPitchData.slice(currentAudioChunkIndex, MAX_POINTS + currentAudioChunkIndex+1)
+              setAcapellaChunk(parsedData)
+              
           } else if (typeof data === 'string') {
               // Handle Base64 audio data if needed
               console.warn(`Unexpected Base64 data received.`);

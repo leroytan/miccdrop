@@ -406,6 +406,7 @@ app.post("/api/v1/getPitch", async (req, res) => {
     }
 
     if (!data || !data.pitch_url) {
+      console.log(data) //TODO
       return res.status(404).json({
         status: "error",
         message: "CSV file not found for the given song.",
