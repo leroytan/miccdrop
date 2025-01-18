@@ -6,28 +6,49 @@ import { Text, Image, View, StyleSheet, Pressable } from 'react-native';
 const ResultsPage = () => {
 	// Placeholder data
 	const searchParams = useSearchParams(); // Retrieve parameters from the route
-	const song = searchParams.get('song'); // Use get method to retrieve the song parameter
+	const songId = searchParams.get('spotifyId'); // Use get method to retrieve the song parameter
 	const score = searchParams.get('score');
 	const [parsedSong, setParsedSong] = useState(null); // State to hold parsed song data
 	const [loading, setLoading] = useState(true); // State to track loading
-
+	const [image, setImage] = useState(null);
+	const [name, setName] = useState(null);
 	useEffect(() => {
-		const loadSongData = async () => {
+		const loadSongInfo = async () => {
+			if (!songId) {
+				console.error("No Spotify ID provided!");
+				return;
+			}
+
 			try {
-				if (song) {
-					const parsed = JSON.parse(song);
-					setParsedSong(parsed); // Save parsed song data
+				// Fetch song details from the backend TO CHANGE
+				const songName = await fetch(
+					`http://${process.env.EXPO_PUBLIC_LOCALHOST}:3001/api/v1/getSongWithId?id=${songId}`
+				);
+
+				if (!songName.ok) {
+					throw new Error(`Failed to fetch song name: ${songName.statusText}`);
 				}
+
+				const songImage = await fetch(
+					`http://${process.env.EXPO_PUBLIC_LOCALHOST}:3001/api/v1/getSongWithId?id=${songId}`
+				);
+				// new endpoint
+				if (!songImage.ok) {
+					throw new Error(`Failed to fetch song image: ${songImage.statusText}`);
+				}
+
+				setName(songName); // Set the lyrics state with the content
+				setImage(songImage); // Set the lyrics state with the content
 			} catch (error) {
-				console.error('Error parsing song data:', error);
+				console.error("Error loading LRC file:", error);
 			} finally {
-				setLoading(false); // Stop loading once data is processed
+				setLoading(false); // Update loading state to false
 			}
 		};
 
-		loadSongData();
-	}, [song]);
-
+		loadSongInfo();
+	}, [songId]);
+	
 	if (loading) {
 		// Show a loading indicator while data is being processed
 		return (
@@ -37,11 +58,11 @@ const ResultsPage = () => {
 		);
 	}
 
+
 	// Extract song details after loading
-	const albumCover =
-		parsedSong?.album?.images?.[0]?.url || 'https://example.com/default-image.jpg';
-	const songName = parsedSong?.name || 'Unknown Song';
-		
+	const albumCover = image ? image : "https://i.scdn.co/image/ab67616d0000b27360cb9332e8c8c7d8e50854b3";
+
+	const songName = name;
 	return (
 		<View style={styles.container}>
 			<Image source={{ uri: albumCover }} style={styles.albumCover} />
@@ -56,7 +77,7 @@ const ResultsPage = () => {
 			</Pressable>
 			<Pressable
 				style={styles.button}
-				onPress={() => router.push({ "pathname": '/trackPlayer', "params": { "song": song } })}
+				onPress={() => router.push({ "pathname": '/trackPlayer', "params": { "songId": songId } })}
 			>
 				<Text style={styles.buttonText}>Play Again!</Text>
 			</Pressable>
@@ -96,7 +117,7 @@ const styles = StyleSheet.create({
 	},
 	button: {
 		backgroundColor: '#007bff',
-		padding: 15,
+		padding: 10,
 		borderRadius: 10,
 	},
 	buttonText: {

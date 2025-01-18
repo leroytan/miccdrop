@@ -323,6 +323,64 @@ app.get("/api/v1/getSongWithId", async (req, res) => {
   }
 });
 
+app.get("/api/v1/getSong", async (req, res) => {
+  const { id } = req.query; // Extract 'id' from the query parameters
+
+  if (!id) {
+    return res.status(400).json({
+      status: "error",
+      message: "Spotify ID is required.",
+    });
+  }
+
+  try {
+    // Fetch the song details from the database
+    const { data, error } = await supabase
+      .from("songs")
+      .select("song_name, lyrics_url, image_url, artist") // Include 'song_name', 'lyrics_url', 'image_url', 'artist'
+      .eq("spotify_id", id)
+      .single();
+
+    if (error) {
+      console.error("Error fetching song:", error);
+      return res.status(500).json({
+        status: "error",
+        message: "An error occurred while fetching the song.",
+      });
+    }
+
+    if (!data) {
+      return res.status(404).json({
+        status: "error",
+        message: "Song not found.",
+      });
+    }
+
+    // Check if the song has a lyrics_url
+    if (!data.lyrics_url) {
+      return res.status(404).json({
+        status: "error",
+        message: "Lyrics file not found for the given song.",
+      });
+    }
+
+    // Return the song details
+    return res.status(200).json({
+      status: "success",
+      song_name: data.song_name,
+      image_url: data.image_url,
+      artist: data.artist,
+      lyrics_url: data.lyrics_url,
+    });
+  } catch (err) {
+    console.error("Unexpected error fetching song:", err);
+    return res.status(500).json({
+      status: "error",
+      message: "An unexpected error occurred.",
+    });
+  }
+});
+
 
 
 //Pitch detection API
@@ -382,7 +440,6 @@ linkPitchToSong();
 
 app.post("/api/v1/getPitch", async (req, res) => {
   const { id } = req.query; // Extract 'id' from the query parameters
-
   if (!id) {
     return res.status(400).json({
       status: "error",

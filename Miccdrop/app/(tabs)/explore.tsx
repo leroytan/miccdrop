@@ -128,6 +128,7 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
     elevation: 8,
     flexBasis: "48%",
+    maxWidth: "100%",
     aspectRatio: 1, // Makes the card square
   },
   fullWidthCard: {
