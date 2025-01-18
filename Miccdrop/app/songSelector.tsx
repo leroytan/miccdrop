@@ -8,14 +8,14 @@ type Song = {
   song_name: string;
   spotify_id: string;
   lyrics_url: string;
-  image_url: string;
+  images: string;
   artist: string;
 };
 
 const SongItem = ({ item }: { item: Song }) => (
 	<View key={item.spotify_id} style={styles.songItem}>
 		<Image
-			source={{ uri: item.image_url }}
+			source={{ uri: item.images }}
 			style={styles.albumCover}
 		/>
 		<View style={styles.songInfo}>
