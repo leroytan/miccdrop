@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
     flexDirection: "row", 
     alignItems: "center",
     justifyContent: "center",
-    marginTop:13
+    marginTop:10
   },
   loginText: {
     fontSize: 13,
