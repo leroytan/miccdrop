@@ -9,7 +9,6 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Animated } from "react-native";
-import { Pressable } from "react-native-gesture-handler";
 import { Link } from "expo-router";
 const { width, height } = Dimensions.get("window");
 const AnimatedLinearGradient =
