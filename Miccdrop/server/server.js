@@ -2,11 +2,14 @@ require('dotenv').config();
 
 const express = require("express");
 const { createClient } = require('@supabase/supabase-js');
+const cors = require("cors"); // Import CORS middleware
 const bcrypt = require("bcrypt"); 
 
 const app = express();
 const port = 3001;
 
+// Enable CORS for all origins
+app.use(cors()); 
 // Load environment variables and log them for debugging
 console.log('SUPABASE_URL:', process.env.supabaseUrl);
 console.log('SUPABASE_KEY:', process.env.supabaseKEY);
