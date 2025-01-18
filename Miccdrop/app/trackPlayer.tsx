@@ -1,136 +1,124 @@
-import React, { CSSProperties, useCallback, useEffect, useState } from "react";
-import styled, { css } from "styled-components";
-import { Pressable, Text } from "react-native";
+import React, { useCallback, useEffect, useState } from "react";
+import { Pressable, Text, View, StyleSheet, ScrollView } from "react-native";
 import { Lrc, LrcLine, useRecoverAutoScrollImmediately } from "react-lrc";
 import useTimer from "../components/useTimer";
 import Control from "../components/control";
-import { DieWithASmile } from "../assets/lyrics/Die With A Smile"
 import { useSearchParams } from "expo-router/build/hooks";
-import { hello } from "@/assets/lyrics/Hello";
 import { router } from "expo-router";
 import * as FileSystem from 'expo-file-system';
 import AudioPlayer from "./AudioPlayer";
 import PitchGraph from "./pitchGraph";
 
-function trackPlayer() {
-	const [lyrics, setLyrics] = useState<string>("");
-	const searchParams = useSearchParams(); // Retrieve parameters from the route
-	const song = searchParams.get('song'); // Use get method to retrieve the song parameter
-	const songName = song ? JSON.parse(song).name : null;
-	const songId : string = song ? JSON.parse(song).id : "";
-	// console.log(songName);
-	// console.log(songId);
 
-	const {
-		currentMillisecond,
-		setCurrentMillisecond,
-		reset,
-		play,
-		pause,
-	} = useTimer(4);
+function TrackPlayer() {
+  const [lyrics, setLyrics] = useState<string>("");
 
-	const { signal, recoverAutoScrollImmediately } = useRecoverAutoScrollImmediately();
+  const {
+    currentMillisecond,
+    setCurrentMillisecond,
+    reset,
+    play,
+    pause,
+  } = useTimer(10);
 
-	useEffect(() => {
-		const loadLrcFile = async () => {
-			try {
-				const response = await fetch(`@/assets/lyrics/1GEBsLDvJGw7kviySRI6GX.lrc`);
-				// Check if the response is okay
-				if (!response.ok) {
-					throw new Error(`Failed to fetch .lrc file: ${response.statusText}`);
-				}
 
-				// Parse the .lrc file as text
-				const lrcContent = await response.text();
+  const searchParams = useSearchParams();
+  const spotifyId = searchParams.get("spotify_id"); // Retrieve spotify_id parameter
+  
+  useEffect(() => {
+    const loadLrcFile = async () => {
+      if (!spotifyId) {
+        console.error("No Spotify ID provided!");
+        return;
+      }
+  
+      try {
+        // Fetch song details from the backend
+        const response = await fetch(
+          `http://localhost:3001/api/v1/getSongWithId?id=${spotifyId}`
+        );
+  
+        if (!response.ok) {
+          throw new Error(`Failed to fetch song details: ${response.statusText}`);
+        }
 
-				// Set the lyrics state with the fetched content
-				setLyrics(lrcContent);
-			} catch (error) {
-				console.error("Error loading LRC file:", error);
-			}
-		};
+        const lrcContent = await response.text(); // Retrieve plain text content
+        console.log(lrcContent)
+        setLyrics(lrcContent); // Set the lyrics state with the content
+        } catch (error) {
+        console.error("Error loading LRC file:", error);
+      }
+    };
+  
+    loadLrcFile();
+  }, [spotifyId]);
 
-		loadLrcFile();
-	}, []);
 
-	const lineRenderer = useCallback(
-		({ active, line: { content } }: { active: boolean; line: LrcLine }) => (
-			<Line active={active}>{content}</Line>
-		),
-		[]
-	);
+  const lineRenderer = ({ active, line: { content } }: { active: boolean; line: LrcLine }) => (
+    <Text style={[styles.line, active && styles.activeLine]}>{content}</Text>
 
-	const newPitch = Array.from({ length: 10 }, () => ({
-		pitch: 300,
-		clarity: 100,
-	  }));
+  );
 
-	return (
-		<Root style={{ backgroundColor: "white" }}>
-			<AudioPlayer songID = {songId}/>
-			<Control
-				onPlay={play}
-				onPause={pause}
-				onReset={reset}
-				current={currentMillisecond}
-				setCurrent={setCurrentMillisecond}
-				recoverAutoScrollImmediately={recoverAutoScrollImmediately}
-			/>
-			<Lrc
-				lrc={lyrics}
-				lineRenderer={lineRenderer}
-				currentMillisecond={currentMillisecond}
-				verticalSpace
-				style={lrcStyle}
-				recoverAutoScrollSingal={signal}
-				recoverAutoScrollInterval={5000}
-			/>
-			<Pressable onPress={() =>
-				// Navigate to the results page with the song parameter and score! Placeholder
-				router.push({
-					pathname: '/results',
-					params: { song: JSON.stringify(song), score: 3700 },
-				})}>
-				<Text style={
-					{
-						color: "blue",
-						textAlign: "center",
-						fontSize: 16,
-						margin: 10,
-					}
-				}>Result</Text>
-			</Pressable>
-		</Root>
-	);
+
+  return (
+    <View style={styles.root}>
+		{spotifyId !== null && <AudioPlayer songID = {spotifyId}/>}
+      <Control
+        onPlay={play}
+        onPause={pause}
+        onReset={reset}
+        current={currentMillisecond}
+        setCurrent={setCurrentMillisecond}
+      />
+      <ScrollView style={styles.lrcContainer}>
+        <Lrc
+          lrc={lyrics}
+          lineRenderer={lineRenderer}
+          currentMillisecond={currentMillisecond}
+          verticalSpace
+          recoverAutoScrollInterval={5000}
+        />
+      </ScrollView>
+      <Pressable
+        onPress={() =>
+          router.push({
+            pathname: "/results",
+            params: { song: JSON.stringify(song), score: 3700 },
+          })
+        }
+      >
+        <Text style={styles.resultButton}>Result</Text>
+      </Pressable>
+    </View>
+  );
 }
 
-const Root = styled.div`
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
+const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    backgroundColor: "white",
+    justifyContent: "center",
+  },
+  lrcContainer: {
+    flex: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  line: {
+    fontSize: 16,
+    textAlign: "center",
+    color: "black",
+    paddingVertical: 5,
+  },
+  activeLine: {
+    color: "green",
+  },
+  resultButton: {
+    color: "blue",
+    textAlign: "center",
+    fontSize: 16,
+    margin: 10,
+  },
+});
 
-  display: flex;
-  flex-direction: column;
-`;
-const lrcStyle: CSSProperties = {
-	flex: 1,
-	minHeight: 0,
-	fontSize: "16px",
-	fontFamily: "monospace",
-};
-const Line = styled.div<{ active: boolean }>`
-  min-height: 10px;
-  padding: 5px 20px;
-
-  font-size: 16px;
-  text-align: center;
-  color: white;
-
-  ${({ active }) => css`
-    color: ${active ? "green" : "black"};
-  `}
-`;
-
-export default trackPlayer;
+export default TrackPlayer;
