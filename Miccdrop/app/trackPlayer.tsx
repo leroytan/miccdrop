@@ -1,131 +1,127 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, ScrollView, StyleSheet, Dimensions } from "react-native";
-import { useSearchParams } from "expo-router"; // Ensure you have expo-router installed
+import React, { useCallback, useEffect, useState } from "react";
+import { Pressable, Text, View, StyleSheet, ScrollView } from "react-native";
+import { Lrc, LrcLine, useRecoverAutoScrollImmediately } from "react-lrc";
+import useTimer from "../components/useTimer";
+import Control from "../components/control";
+import { useSearchParams } from "expo-router/build/hooks";
+import { router } from "expo-router";
+import AudioPlayer from "./AudioPlayer";
 
-const LyricsPage = () => {
-  const [lyrics, setLyrics] = useState<{ time: number; text: string }[]>([]);
-  const [currentTime, setCurrentTime] = useState(0);
 
-  // Extract query parameters
-  const searchParams = useSearchParams();
-  const songParam = searchParams.get("song");
-  const song = songParam ? JSON.parse(songParam) : null;
+function TrackPlayer() {
+  const [lyrics, setLyrics] = useState<string>("");
+  const searchParams = useSearchParams(); // Extract the query parameters
+  const songParam = searchParams.get("song"); // Get the song parameter
+  const song = songParam ? JSON.parse(songParam) : null; // Parse the JSON string
 
-  // Destructure song details
-  const { spotify_id: spotifyId, song_name, artist } = song || {};
 
-  // Fetch and parse the LRC file
+  const { spotify_id: spotifyId, song_name, artist } = song; // Destructure the song object
+
+
+  const {
+    currentMillisecond,
+    setCurrentMillisecond,
+    reset,
+    play,
+    pause,
+  } = useTimer(10);
+
+  
   useEffect(() => {
     const loadLrcFile = async () => {
       if (!spotifyId) {
         console.error("No Spotify ID provided!");
         return;
       }
-
+  
       try {
+        // Fetch song details from the backend
         const response = await fetch(
-          `http://${process.env.EXPO_PUBLIC_LOCALHOST}:3001/api/v1/getSongWithId?id=${spotifyId}`
+          `http://localhost:3001/api/v1/getSongWithId?id=${spotifyId}`
         );
-
+  
         if (!response.ok) {
           throw new Error(`Failed to fetch song details: ${response.statusText}`);
         }
 
-        const lrcContent = await response.text();
-        const parsedLyrics = parseLRC(lrcContent); // Parse LRC file content
-        setLyrics(parsedLyrics);
-      } catch (error) {
+        const lrcContent = await response.text(); // Retrieve plain text content
+        console.log(lrcContent)
+        setLyrics(lrcContent); // Set the lyrics state with the content
+        } catch (error) {
         console.error("Error loading LRC file:", error);
       }
     };
-
+  
     loadLrcFile();
   }, [spotifyId]);
 
-  // Simulate music progress
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentTime((prevTime) => (prevTime >= 300 ? 0 : prevTime + 1)); // Loop at 300s
-    }, 1000);
 
-    return () => clearInterval(interval);
-  }, []);
+  const lineRenderer = ({ active, line: { content } }: { active: boolean; line: LrcLine }) => (
 
-  // Parse LRC content into an array of objects
-  const parseLRC = (lrc: string) => {
-    const lines = lrc.split("\n");
-    return lines
-      .map((line) => {
-        const match = line.match(/\[(\d+):(\d+)\.(\d+)\](.+)/);
-        if (match) {
-          const minutes = parseInt(match[1], 10);
-          const seconds = parseInt(match[2], 10);
-          const milliseconds = parseInt(match[3], 10);
-          const time = minutes * 60 + seconds + milliseconds / 1000;
-          const text = match[4].trim();
-          return { time, text };
-        }
-        return null;
-      })
-      .filter(Boolean) as { time: number; text: string }[];
-  };
+    <Text style={[styles.line, active && styles.activeLine]}>{content}</Text>
+
+  );
+
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.songDetails}>
-        {song_name} - {artist}
-      </Text>
-      <ScrollView contentContainerStyle={styles.scrollView}>
-        {lyrics.map((line, index) => (
-          <Text
-            key={index}
-            style={[
-              styles.lyricText,
-              currentTime >= line.time && currentTime < (lyrics[index + 1]?.time || Infinity)
-                ? styles.activeLyric
-                : styles.inactiveLyric,
-            ]}
-          >
-            {line.text}
-          </Text>
-        ))}
+    <View style={styles.root}>
+		{spotifyId !== null && <AudioPlayer songID = {spotifyId}/>}
+      <Control
+        onPlay={play}
+        onPause={pause}
+        onReset={reset}
+        current={currentMillisecond}
+        setCurrent={setCurrentMillisecond}
+      />
+      <ScrollView style={styles.lrcContainer}>
+        <Lrc
+          lrc={lyrics}
+          lineRenderer={lineRenderer}
+          currentMillisecond={currentMillisecond}
+          verticalSpace
+          recoverAutoScrollInterval={5000}
+        />
       </ScrollView>
+      <Pressable
+        onPress={() =>
+          router.push({
+            pathname: "/results",
+            params: { songId: JSON.stringify(spotifyId), score: 3700 },
+          })
+        }
+      >
+        <Text style={styles.resultButton}>Result</Text>
+      </Pressable>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
-  container: {
+  root: {
     flex: 1,
-    backgroundColor: "#121212",
-    alignItems: "center",
+    backgroundColor: "white",
     justifyContent: "center",
   },
-  scrollView: {
-    paddingVertical: 20,
-    width: "100%",
-    alignItems: "center",
+  lrcContainer: {
+    flex: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
   },
-  lyricText: {
-    fontSize: 18,
+  line: {
+    fontSize: 16,
     textAlign: "center",
-    marginVertical: 10,
-    width: Dimensions.get("window").width - 40,
+    color: "black",
+    paddingVertical: 5,
   },
-  activeLyric: {
-    color: "#1DB954", // Spotify green for active lyric
-    fontWeight: "bold",
+  activeLine: {
+    color: "green",
   },
-  inactiveLyric: {
-    color: "#FFFFFF", // White for inactive lyrics
-    opacity: 0.6,
- 
-  },
-  songDetails: {
-    color: "#FFFFFF",
-    fontSize: 20,
+  resultButton: {
+    color: "blue",
     textAlign: "center",
-    marginBottom: 20,
-    fontWeight: "bold",
+    fontSize: 16,
+    margin: 10,
   },
 });
+
+export default TrackPlayer;
