@@ -1,114 +1,78 @@
-import React, { Component, useState } from 'react';
-import { Text, Image, View, StyleSheet, ScrollView, Pressable } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Text, View, StyleSheet, ScrollView, Pressable, Image } from 'react-native';
 import { SearchBar } from '@rneui/themed';
 import { router, useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 
-const songNames = require('../spotifyData.json');
-
-// Define types for the artist structure
-type Artist = {
-	external_urls: {
-		spotify: string;
-	};
-	href: string;
-	id: string;
-	name: string;
-	type: string;
-	uri: string;
+type Song = {
+  song_name: string;
+  spotify_id: string;
+  lyrics_url: string;
 };
 
-// Define types for the album structure
-type Album = {
-	album_type: string;
-	artists: Artist[];
-	available_markets: string[];
-	external_urls: {
-		spotify: string;
-	};
-	href: string;
-	id: string;
-	images: {
-		url: string;
-		width: number;
-		height: number;
-	}[];
-	name: string;
-	release_date: string;
-	release_date_precision: string;
-	total_tracks: number;
-	type: string;
-	uri: string;
-};
-
-// Define types for the main track structure
-type Track = {
-	album: Album;
-	artists: Artist[];
-	available_markets: string[];
-	disc_number: number;
-	duration_ms: number;
-	explicit: boolean;
-	external_ids: {
-		isrc: string;
-	};
-	external_urls: {
-		spotify: string;
-	};
-	href: string;
-	id: string;
-	is_local: boolean;
-	name: string;
-	popularity: number;
-	preview_url: string | null;
-	track_number: number;
-	type: string;
-	uri: string;
-};
-
-const SongItem = ({ item }: { item: Track }) => (
-	<View key={item.id} style={styles.songItem}>
-		<Image
-			source={{ uri: item.album.images[0].url }}
-			style={styles.albumCover}
-		/>
-		<View style={styles.songInfo}>
-			<Text style={styles.songName}>{item.name}</Text>
-			<Text style={styles.artistName}>{item.artists[0].name}</Text>
-		</View>
-		<Pressable
-			style={styles.playButton}
-			onPress={() =>
-				router.push({
-					pathname: '/trackPlayer',
-					params: { song: JSON.stringify(item) },
-				})
-			}
-		>
-			<Image
-				source={require('../assets/images/playIcon.png')}
-				style={styles.playIcon}
-			/>
-		</Pressable>
-	</View>
+const SongItem = ({ item }: { item: Song }) => (
+  <View key={item.spotify_id} style={styles.songItem}>
+    <View>
+      <Text style={styles.songName}>{item.song_name}</Text>
+=    </View>
+    <Pressable
+      onPress={() =>
+        router.push({
+          pathname: '/trackPlayer',
+          params: { spotify_id: item.spotify_id }, // Pass song data as parameters
+        })
+      }
+    >
+      <Text style={styles.playButton}>Play</Text>
+    </Pressable>
+  </View>
 );
 
 function SongScroller() {
-	const [query, setQuery] = useState("");
-	const [results, setResults] = useState<Track[]>([]);
-	const updateSearch = (query: string) => {
-		setQuery(query);
-		const results = searchSongs(query);
-		setResults(results);
-	};
+  const [query, setQuery] = useState('');
+  const [songs, setSongs] = useState<Song[]>([]);
+  const [results, setResults] = useState<Song[]>([]);
+  const [loading, setLoading] = useState(true);
 
-	// currently only searches the first artist
-	const searchSongs = (query: string): Track[] => {
-		return songNames.filter((song: Track) =>
-			song.name.toLowerCase().includes(query.toLowerCase()) ||
-			song.artists[0].name.toLowerCase().includes(query.toLowerCase())
-		);
-	};
+  const fetchSongs = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('http://localhost:3001/api/v1/getAllSongs', {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }); // Use the correct base URL
+      console.log("Response Status:", response.status);
+      console.log("Response Headers:", response.headers);
+      
+      const data = await response.json(); // Parse the response as JSON
+      console.log("Parsed Data:", data);
+  
+      if (data.status === 'success') {
+        setSongs(data.data);
+        setResults(data.data); // Show all songs initially
+      } else {
+        console.error('Failed to fetch songs:', data.message);
+      }
+      } catch (error) {
+      console.error('Error fetching songs:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  useEffect(() => {
+    fetchSongs();
+  }, []);
+
+  const updateSearch = (query: string) => {
+    setQuery(query);
+    const filteredResults = songs.filter((song) =>
+      song.song_name.toLowerCase().includes(query.toLowerCase())
+    );
+    setResults(filteredResults);
+  };
 
 	return (
 		<LinearGradient
@@ -132,15 +96,14 @@ function SongScroller() {
 			/>
 			<ScrollView contentContainerStyle={styles.songList}>
 				{query.length === 0
-					? songNames.map((item: Track) => <SongItem key={item.id} item={item} />)
-					: results.map((item: Track) => <SongItem key={item.id} item={item} />)}
+					? songs.map((item: Song) => <SongItem key={item.spotify_id} item={item} />)
+					: results.map((item: Song) => <SongItem key={item.spotify_id} item={item} />)}
 			</ScrollView>
 		</LinearGradient>
 	);
 }
 
-
-export default SongScroller
+export default SongScroller;
 
 const styles = StyleSheet.create({
 	backButton: {
