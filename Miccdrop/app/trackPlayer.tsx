@@ -6,6 +6,7 @@ import Control from "../components/control";
 import { useSearchParams } from "expo-router/build/hooks";
 import { router } from "expo-router";
 import AudioPlayer from "./AudioPlayer";
+import LyricComponent from "./LyricComponent";
 
 
 function TrackPlayer() {
@@ -70,13 +71,7 @@ function TrackPlayer() {
         setCurrent={setCurrentMillisecond}
       />
       <ScrollView style={styles.lrcContainer}>
-        <Lrc
-          lrc={lyrics}
-          lineRenderer={lineRenderer}
-          currentMillisecond={currentMillisecond}
-          verticalSpace
-          recoverAutoScrollInterval={5000}
-        />
+        <LyricComponent lrc={lyrics} currentTime={currentMillisecond}/>
       </ScrollView>
       <Pressable
         onPress={() =>
