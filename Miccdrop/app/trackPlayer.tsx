@@ -82,7 +82,7 @@ function TrackPlayer() {
         onPress={() =>
           router.push({
             pathname: "/results",
-            params: { song: JSON.stringify(song), score: 3700 },
+            params: { songId: JSON.stringify(spotifyId), score: 3700 },
           })
         }
       >
