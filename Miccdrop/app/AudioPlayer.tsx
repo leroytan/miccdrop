@@ -20,13 +20,13 @@
   const MAX_POINTS = 300
   const detector = PitchDetector.forFloat32Array(AUDIO_CHUNK_LENGTH); // 10 milliseconds
   detector.minVolumeDecibels = -20;
-  export default function AudioPlayer({songID} : {songID : string}) {
-
+  export default function AudioPlayer({songID, setCurrentPitches} 
+    : {songID : string, setCurrentPitches : Dispatch<SetStateAction<PitchData[]>>}) {
+    
     const [recording, setRecording] = useState<AudioRecording | null>();
     const [instrumental, setInstrumental] = useState<any>();
     const [currentPitch, setCurrentPitch] = useState<PitchData | null>(null); // Store detected pitch
     const [acapellaChunk, setAcapellaChunk] = useState<PitchData[]>([]);
-    //const [correctPitchData, setCorrectPitchData] = useState<PitchData[]>([]);
     let correctPitchData : PitchData[] = [];
     const [instrumentalLoaded, setInstrumentalLoaded] = useState(false);
     let currentAudioChunkIndex = 0;
@@ -121,10 +121,17 @@
               }
               const [pitch, clarity] = detector.findPitch(reshapedData, SAMPLE_RATE);
               if (clarity > 0.9 && pitch > 65 && pitch < 1047) { // between c2 and c6
-                setCurrentPitch( { "pitch" : pitch, "clarity" : clarity });    
+                setCurrentPitch( { "pitch" : pitch, "clarity" : clarity }); 
+                setCurrentPitches((prevPitches) => {
+                  return [...prevPitches, { "pitch" : pitch, "clarity" : clarity }];
+                });   
               } else {
-                setCurrentPitch({"pitch" : 0, "clarity" : 0});     
+                setCurrentPitch({"pitch" : 0, "clarity" : 0});  
+                setCurrentPitches((prevPitches) => {
+                  return [...prevPitches, { "pitch" : 0, "clarity" : 0 }];
+                });    
               }
+
               const parsedData = correctPitchData.slice(currentAudioChunkIndex, MAX_POINTS + currentAudioChunkIndex+1)
               setAcapellaChunk(parsedData)
               
