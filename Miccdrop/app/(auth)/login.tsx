@@ -27,7 +27,7 @@ export default function LoginScreen() {
 
   const handleDefaultSignIn = async () => {
     try {
-      const results = await fetch(`http://localhost:3001/api/v1/signInDefault`, {
+      const results = await fetch(`http://${process.env.EXPO_PUBLIC_LOCALHOST}:3001/api/v1/signInDefault`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -70,7 +70,7 @@ export default function LoginScreen() {
       const userInfo = await GoogleSignin.signIn();
       const { email } = userInfo.data.user;
 
-      const results = await fetch(`http://localhost:3001/api/v1/signInWithGoogle`, {
+      const results = await fetch(`http://${process.env.EXPO_PUBLIC_LOCALHOST}:3001/api/v1/signInWithGoogle`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
