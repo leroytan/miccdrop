@@ -22,7 +22,7 @@ export default function AccountCreationScreen() {
 
   const handleCreateAccount = async () => {
     try {
-      const results = await fetch(`http://${process.env.EXPO_PUBLIC_LOCALHOST}:3001/api/v1/createAccount`, {
+      const results = await fetch(`http://localhost:3001/api/v1/createAccount`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
