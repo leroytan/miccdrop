@@ -5,10 +5,12 @@ import useTimer from "../components/useTimer";
 import Control from "../components/control";
 import { useSearchParams } from "expo-router/build/hooks";
 import { router } from "expo-router";
+import AudioPlayer from "./AudioPlayer";
+
 
 function TrackPlayer() {
   const [lyrics, setLyrics] = useState<string>("");
-
+  
 
   const {
     currentMillisecond,
@@ -17,6 +19,7 @@ function TrackPlayer() {
     play,
     pause,
   } = useTimer(10);
+
 
   const searchParams = useSearchParams();
   const spotifyId = searchParams.get("spotify_id"); // Retrieve spotify_id parameter
@@ -38,7 +41,6 @@ function TrackPlayer() {
           throw new Error(`Failed to fetch song details: ${response.statusText}`);
         }
 
-  
         const lrcContent = await response.text(); // Retrieve plain text content
         console.log(lrcContent)
         setLyrics(lrcContent); // Set the lyrics state with the content
@@ -56,8 +58,10 @@ function TrackPlayer() {
 
   );
 
+
   return (
     <View style={styles.root}>
+		{spotifyId !== null && <AudioPlayer songID = {spotifyId}/>}
       <Control
         onPlay={play}
         onPause={pause}
@@ -78,7 +82,7 @@ function TrackPlayer() {
         onPress={() =>
           router.push({
             pathname: "/results",
-            params: { song: JSON.stringify(song), score: 3700 },
+            params: { songId: JSON.stringify(spotifyId), score: 3700 },
           })
         }
       >
