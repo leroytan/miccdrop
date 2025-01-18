@@ -6,7 +6,7 @@ import { Text, Image, View, StyleSheet, Pressable } from 'react-native';
 const ResultsPage = () => {
 	// Placeholder data
 	const searchParams = useSearchParams(); // Retrieve parameters from the route
-	const songId = searchParams.get('spotifyId'); // Use get method to retrieve the song parameter
+	const songId = searchParams.get('songId'); // Use get method to retrieve the song parameter
 	const score = searchParams.get('score');
 	const [parsedSong, setParsedSong] = useState(null); // State to hold parsed song data
 	const [loading, setLoading] = useState(true); // State to track loading
@@ -37,8 +37,8 @@ const ResultsPage = () => {
 					throw new Error(`Failed to fetch song image: ${songImage.statusText}`);
 				}
 
-				setName(songName); // Set the lyrics state with the content
-				setImage(songImage); // Set the lyrics state with the content
+				// setName(songName); // Set the lyrics state with the content
+				// setImage(songImage); // Set the lyrics state with the content
 			} catch (error) {
 				console.error("Error loading LRC file:", error);
 			} finally {

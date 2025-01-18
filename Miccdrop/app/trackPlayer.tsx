@@ -7,6 +7,9 @@ import { useSearchParams } from "expo-router/build/hooks";
 import { router } from "expo-router";
 import AudioPlayer from "./AudioPlayer";
 import LyricComponent from "./LyricComponent";
+import { PitchData } from "@/types/pitchData";
+import { parseCSV } from "./utility";
+import { scoring } from "./scoring";
 
 
 function TrackPlayer() {
@@ -14,7 +17,8 @@ function TrackPlayer() {
   const searchParams = useSearchParams(); // Extract the query parameters
   const songParam = searchParams.get("song"); // Get the song parameter
   const song = songParam ? JSON.parse(songParam) : null; // Parse the JSON string
-
+  const [currentPitches, setCurrentPitches] = useState<PitchData[]>([]); // Store detected pitch
+  let correctPitchData : PitchData[] = [];
 
   const { spotify_id: spotifyId, song_name, artist } = song; // Destructure the song object
 
@@ -25,7 +29,7 @@ function TrackPlayer() {
     reset,
     play,
     pause,
-  } = useTimer(10);
+  } = useTimer(1.02);
 
   
   useEffect(() => {
@@ -57,6 +61,38 @@ function TrackPlayer() {
   }, [spotifyId]);
 
 
+  useEffect(() => {
+
+          const loadCSV = async () => {
+            try {
+              // Fetch song details from the backend
+              const response = await fetch(
+                `http://localhost:3001/api/v1/getPitch?id=${spotifyId}`,
+                {
+                  method: 'POST', // Specify the method
+                  headers: {
+                    'Content-Type': 'application/json', 
+                  },
+                }
+              );
+        
+              if (!response.ok) {
+                throw new Error(`Failed to fetch song pitch: ${response.statusText}`);
+              }
+      
+              const pitchContent = await response.text(); // Retrieve plain text content
+              const parsed = await parseCSV(pitchContent)
+              correctPitchData = parsed;
+              
+              } catch (error) {
+              console.error("Error loading pitch file:", error);
+            }
+          };
+  
+          loadCSV();
+          
+      }, []); 
+
   const lineRenderer = ({ active, line: { content } }: { active: boolean; line: LrcLine }) => (
 
     <Text style={[styles.line, active && styles.activeLine]}>{content}</Text>
@@ -66,7 +102,7 @@ function TrackPlayer() {
 
   return (
     <View style={styles.root}>
-		{spotifyId !== null && <AudioPlayer songID = {spotifyId}/>}
+		{spotifyId !== null && <AudioPlayer songID = {spotifyId} setCurrentPitches = { setCurrentPitches}/>}
       <Control
         onPlay={play}
         onPause={pause}
@@ -79,9 +115,10 @@ function TrackPlayer() {
       </ScrollView>
       <Pressable
         onPress={() =>
+  
           router.push({
             pathname: "/results",
-            params: { songId: JSON.stringify(spotifyId), score: 3700 },
+            params: { songId: JSON.stringify(spotifyId), score: scoring(correctPitchData, currentPitches) },
           })
         }
       >
