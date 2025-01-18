@@ -5,13 +5,12 @@ import useTimer from "../components/useTimer";
 import Control from "../components/control";
 import { useSearchParams } from "expo-router/build/hooks";
 import { router } from "expo-router";
-import * as FileSystem from 'expo-file-system';
 import AudioPlayer from "./AudioPlayer";
-import PitchGraph from "./pitchGraph";
 
 
 function TrackPlayer() {
   const [lyrics, setLyrics] = useState<string>("");
+  
 
   const {
     currentMillisecond,
