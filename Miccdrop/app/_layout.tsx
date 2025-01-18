@@ -31,7 +31,11 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <Stack>
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="trackPlayer" options={{ headerShown: false }} />
+        <Stack.Screen name="results" options={{ headerShown: false }} />
+        <Stack.Screen name="songSelector" options={{ headerShown: false }} />
+        <Stack.Screen name="+not-found" options={{ headerShown: false }}/>
       </Stack>
       <StatusBar style="auto" />
     </ThemeProvider>

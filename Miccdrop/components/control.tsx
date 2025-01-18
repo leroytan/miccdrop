@@ -7,14 +7,12 @@ function Control({
   onReset,
   current,
   setCurrent,
-  recoverAutoScrollImmediately,
 }: {
   onPlay: () => void;
   onPause: () => void;
   onReset: () => void;
   current: number;
   setCurrent: (c: number) => void;
-  recoverAutoScrollImmediately: () => void;
 }) {
   return (
     <View style={styles.container}>
@@ -33,9 +31,6 @@ function Control({
         value={current.toString()}
         onChangeText={(text) => setCurrent(Number(text))}
       />
-      <TouchableOpacity onPress={recoverAutoScrollImmediately} style={styles.button}>
-        <Text style={styles.buttonText}>Recover Auto Scroll</Text>
-      </TouchableOpacity>
     </View>
   );
 }

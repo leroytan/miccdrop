@@ -68,7 +68,6 @@ function TrackPlayer() {
         onReset={reset}
         current={currentMillisecond}
         setCurrent={setCurrentMillisecond}
-        recoverAutoScrollImmediately={recoverAutoScrollImmediately}
       />
       <ScrollView style={styles.lrcContainer}>
         <Lrc
