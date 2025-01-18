@@ -8,11 +8,7 @@ import { router } from "expo-router";
 
 function TrackPlayer() {
   const [lyrics, setLyrics] = useState<string>("");
-  const searchParams = useSearchParams(); // Retrieve parameters from the route
-  const song = searchParams.get("song"); // Use get method to retrieve the song parameter
-  const songName = song ? JSON.parse(song).name : null;
-  const songId = song ? JSON.parse(song).id : null;
-  console.log(songName);
+
 
   const {
     currentMillisecond,
@@ -22,31 +18,42 @@ function TrackPlayer() {
     pause,
   } = useTimer(10);
 
+  const searchParams = useSearchParams();
+  const spotifyId = searchParams.get("spotify_id"); // Retrieve spotify_id parameter
+  
   useEffect(() => {
     const loadLrcFile = async () => {
+      if (!spotifyId) {
+        console.error("No Spotify ID provided!");
+        return;
+      }
+  
       try {
-        const response = await fetch(`/lyrics/${songId}.lrc`);
-        // Check if the response is okay
+        // Fetch song details from the backend
+        const response = await fetch(
+          `http://localhost:3001/api/v1/getSongWithId?id=${spotifyId}`
+        );
+  
         if (!response.ok) {
-          throw new Error(`Failed to fetch .lrc file: ${response.statusText}`);
+          throw new Error(`Failed to fetch song details: ${response.statusText}`);
         }
 
-        // Parse the .lrc file as text
-        const lrcContent = await response.text();
-
-        // Set the lyrics state with the fetched content
-        setLyrics(lrcContent);
-      } catch (error) {
+  
+        const lrcContent = await response.text(); // Retrieve plain text content
+        console.log(lrcContent)
+        setLyrics(lrcContent); // Set the lyrics state with the content
+        } catch (error) {
         console.error("Error loading LRC file:", error);
       }
     };
-
+  
     loadLrcFile();
-  }, [songId]);
+  }, [spotifyId]);
 
 
   const lineRenderer = ({ active, line: { content } }: { active: boolean; line: LrcLine }) => (
     <Text style={[styles.line, active && styles.activeLine]}>{content}</Text>
+
   );
 
   return (
@@ -69,7 +76,6 @@ function TrackPlayer() {
       </ScrollView>
       <Pressable
         onPress={() =>
-          // Navigate to the results page with the song parameter and score
           router.push({
             pathname: "/results",
             params: { song: JSON.stringify(song), score: 3700 },

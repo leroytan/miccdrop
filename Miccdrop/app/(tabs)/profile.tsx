@@ -38,7 +38,7 @@ const ProfilePage = () => {
             <Text style={styles.cardContent}>25</Text>
           </View>
         </View>
-        <LinearGradient colors={['#f04be5', '#FFF7AD']} start={[0, 0]}
+        <LinearGradient colors={['#f04be5', '#FFB6B6']} start={[0, 0]}
         end={[1, 2]} style={styles.editButton}>
         <TouchableOpacity>
           <Text style={styles.editButtonText}>Edit Profile</Text>
