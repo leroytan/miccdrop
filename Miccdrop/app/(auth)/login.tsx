@@ -16,7 +16,7 @@ export default function LoginScreen() {
 
   const handleDefaultSignIn = async () => {
     try {
-      const results = await fetch(`http://172.31.27.63:3001/api/v1/signInDefault`, {
+      const results = await fetch(`http://172.31.214.28:3001/api/v1/signInDefault`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -59,7 +59,7 @@ export default function LoginScreen() {
       const user = data.user
       const email = user.email
       try {
-        const results = await fetch(`http://172.31.27.63:3001/api/v1/signInWithGoogle`, {
+        const results = await fetch(`http://172.31.214.28:3001/api/v1/signInWithGoogle`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
