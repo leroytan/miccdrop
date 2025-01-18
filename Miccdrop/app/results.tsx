@@ -22,7 +22,7 @@ const ResultsPage = () => {
 			try {
 				// Fetch song details from the backend TO CHANGE
 				const songName = await fetch(
-					`http://localhost:3001/api/v1/getSongWithId?id=${songId}`
+					`http://${process.env.EXPO_PUBLIC_LOCALHOST}:3001/api/v1/getSongWithId?id=${songId}`
 				);
 
 				if (!songName.ok) {
@@ -30,7 +30,7 @@ const ResultsPage = () => {
 				}
 
 				const songImage = await fetch(
-					`http://localhost:3001/api/v1/getSongWithId?id=${songId}`
+					`http://${process.env.EXPO_PUBLIC_LOCALHOST}:3001/api/v1/getSongWithId?id=${songId}`
 				);
 				// new endpoint
 				if (!songImage.ok) {
