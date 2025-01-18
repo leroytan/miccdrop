@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Text, View, StyleSheet, ScrollView, Pressable, ActivityIndicator } from 'react-native';
+import { Text, View, StyleSheet, ScrollView, Pressable, Image } from 'react-native';
 import { SearchBar } from '@rneui/themed';
-import { router } from 'expo-router';
+import { router, useRouter } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 
 type Song = {
   song_name: string;
@@ -10,11 +11,10 @@ type Song = {
 };
 
 const SongItem = ({ item }: { item: Song }) => (
-  <View key={item.spotify_id} style={styles.item}>
+  <View key={item.spotify_id} style={styles.songItem}>
     <View>
       <Text style={styles.songName}>{item.song_name}</Text>
-      <Text style={styles.spotifyId}>Spotify ID: {item.spotify_id}</Text>
-    </View>
+=    </View>
     <Pressable
       onPress={() =>
         router.push({
@@ -74,77 +74,125 @@ function SongScroller() {
     setResults(filteredResults);
   };
 
-  if (loading) {
-    return (
-      <View style={styles.loader}>
-        <ActivityIndicator size="large" color="#00ff00" />
-      </View>
-    );
-  }
-
-  return (
-    <View style={{ flex: 1, backgroundColor: '#121212' }}>
-      <Text style={styles.text}>Current Category: Popular Songs</Text>
-      <View style={styles.view}>
-        <SearchBar
-          placeholder="Search for a song!"
-          onChangeText={updateSearch}
-          value={query}
-          lightTheme
-        />
-      </View>
-      <View style={{ flex: 1 }}>
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-          {results.map((item: Song) => (
-            <SongItem key={item.spotify_id} item={item} />
-          ))}
-        </ScrollView>
-      </View>
-    </View>
-  );
+	return (
+		<LinearGradient
+			colors={['#94bbe9', '#fad0c4']}
+			style={styles.gradientContainer}
+		>
+			<Pressable style={styles.backButton} onPress={() => router.back()}>
+				<Image
+					source={require('../assets/images/backIcon.png')}
+					style={styles.backIcon}
+				/>
+			</Pressable>
+			<Text style={styles.headerText}>🎵 Popular Songs 🎵</Text>
+			<SearchBar
+				placeholder="Search for a song..."
+				onChangeText={updateSearch}
+				value={query}
+				containerStyle={styles.searchBarContainer}
+				inputContainerStyle={styles.searchBarInput}
+				inputStyle={styles.searchBarText}
+			/>
+			<ScrollView contentContainerStyle={styles.songList}>
+				{query.length === 0
+					? songs.map((item: Song) => <SongItem key={item.spotify_id} item={item} />)
+					: results.map((item: Song) => <SongItem key={item.spotify_id} item={item} />)}
+			</ScrollView>
+		</LinearGradient>
+	);
 }
 
 export default SongScroller;
 
 const styles = StyleSheet.create({
-  item: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 20,
-    margin: 5,
-    borderColor: '#2a4944',
-    borderWidth: 1,
-    backgroundColor: '#d2f7f1',
-    borderRadius: 10,
-  },
-  view: {
-    margin: 10,
-  },
-  text: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    textAlign: 'center',
-    margin: 10,
-    color: 'white',
-  },
-  songName: {
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  spotifyId: {
-    fontSize: 12,
-    color: '#666',
-  },
-  playButton: {
-    fontSize: 16,
-    color: '#007bff',
-    fontWeight: 'bold',
-  },
-  loader: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#121212',
-  },
-});
+	backButton: {
+		position: 'absolute',
+		top: 20,
+		left: 20,
+		zIndex: 1,
+		backgroundColor: '#ffffff',
+		borderRadius: 15,
+		padding: 10,
+		shadowColor: '#000',
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.2,
+		shadowRadius: 4,
+	},
+	backIcon: {
+		width: 20,
+		height: 20,
+		tintColor: '#344e76',
+	},
+	gradientContainer: {
+		flex: 1,
+		paddingHorizontal: 20,
+		paddingVertical: 10,
+	},
+	headerText: {
+		fontSize: 24,
+		fontWeight: 'bold',
+		color: '#344e76',
+		textAlign: 'center',
+		marginVertical: 15,
+	},
+	searchBarContainer: {
+		backgroundColor: 'transparent',
+		borderTopWidth: 0,
+		borderBottomWidth: 0,
+		marginBottom: 15,
+	},
+	searchBarInput: {
+		backgroundColor: '#ffffff',
+		borderRadius: 20,
+		paddingHorizontal: 10,
+		borderWidth: 0, // Remove border
+		shadowColor: 'transparent', // Remove shadow
+	},
+	searchBarText: {
+		color: '#344e76', // Customize text color
+	},
+	songList: {
+		flexGrow: 1,
+	},
+	songItem: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		backgroundColor: '#ffffff',
+		borderRadius: 10,
+		padding: 15,
+		marginBottom: 10,
+		shadowColor: '#000',
+		shadowOffset: { width: 0, height: 1 },
+		shadowOpacity: 0.1,
+		shadowRadius: 3,
+	},
+	albumCover: {
+		width: 60,
+		height: 60,
+		borderRadius: 5,
+		marginRight: 10,
+	},
+	songInfo: {
+		flex: 1,
+	},
+	songName: {
+		fontSize: 16,
+		fontWeight: 'bold',
+		color: '#344e76',
+	},
+	artistName: {
+		fontSize: 14,
+		color: '#576c89',
+	},
+	playButton: {
+		padding: 10,
+		backgroundColor: '#ff9a9e',
+		borderRadius: 20,
+	},
+	playIcon: {
+		width: 20,
+		height: 20,
+		tintColor: '#ffffff',
+	},
+})
