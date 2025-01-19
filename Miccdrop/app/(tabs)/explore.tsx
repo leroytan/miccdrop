@@ -79,11 +79,10 @@ const App = () => {
 
 const styles = StyleSheet.create({
   headerText: {
-    fontSize: 48,
+    fontSize: 30,
     fontWeight: "bold",
     color: "#344e76",
     textAlign: "center",
-    marginBottom: 25,
   },
   background: {
     ...StyleSheet.absoluteFillObject,
@@ -157,6 +156,10 @@ const styles = StyleSheet.create({
   cardImage: {
     width: "100%",
     height: "100%",
+    resizeMode: "contain",
+    boxShadow: "0px 0px 8px rgb(235, 129, 247)",
+    backgroundImage: "linear-gradient(45deg, #ffdeee, #b5fffc)",
+    backdropFilter: "blur(4px)",
   },
 });
 
