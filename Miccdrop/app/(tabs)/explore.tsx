@@ -44,7 +44,11 @@ const App = () => {
             </Pressable>
           </View>
         </View>
+        
         <View style={styles.verticalCardsLayout}>
+        <View>
+          <Text style={styles.headerText}>Choose a category!</Text>
+        </View>
           {/* Top and Trending Row */}
           <View style={styles.horizontalRowLayout}>
             {/* Top Picks Card */}
@@ -61,13 +65,12 @@ const App = () => {
             />
           </View>
           {/* Recents Card */}
-          <View style={styles.fullWidthCard}>
             <Card
               title="Recents"
               imageSource={require("@/assets/images/recentSongs.jpg")}
               href="/songSelector"
+              style={styles.fullWidthCard} 
             />
-          </View>
         </View>
       </View>
     </>
@@ -75,7 +78,15 @@ const App = () => {
 };
 
 const styles = StyleSheet.create({
+  headerText: {
+    fontSize: 48,
+    fontWeight: "bold",
+    color: "#344e76",
+    textAlign: "center",
+    marginBottom: 25,
+  },
   background: {
+    ...StyleSheet.absoluteFillObject,
     position: "absolute",
     top: 0,
     left: 0,
@@ -89,7 +100,9 @@ const styles = StyleSheet.create({
     //backgroundColor: "#e1b1e8",
     padding: 20,
     paddingVertical: 40,
+    paddingTop: 50,
     maxHeight: height,
+    
   },
   topBar: {
     flexDirection: "row",
@@ -104,19 +117,24 @@ const styles = StyleSheet.create({
   },
   verticalCardsLayout: {
     flexDirection: "column",
-    justifyContent: "space-evenly",
+    flex: 1,
+    justifyContent: "space-between",
   },
   levelIndicator: {
     backgroundColor: "#fff7ad",
     paddingVertical: 5,
     paddingHorizontal: 20,
     borderRadius: 20,
-    flexDirection: "row",
-    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 1 },
+    shadowRadius: 5,
+    elevation: 3,
   },
   levelText: {
     fontSize: 16,
     fontWeight: "bold",
+    color: "#344e76",
   },
   card: {
     backgroundColor: "#fff",
@@ -134,6 +152,7 @@ const styles = StyleSheet.create({
   fullWidthCard: {
     flexBasis: "100%", // Ensures the card takes the full width
     marginTop: 16,
+    aspectRatio: 2,
   },
   cardImage: {
     width: "100%",
