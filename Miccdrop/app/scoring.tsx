@@ -33,5 +33,5 @@ export const scoring = (correct : PitchData[], sangNotes : PitchData[]) => {
 		return getFrequencyDifferenceScore(freq1, freq2);
 	  });
 	
-	  return scores.reduce((a, b) => a + b).toFixed(2);
+	  return (scores.reduce((a, b) => a + b) / scores.length ).toFixed(2);
 }
