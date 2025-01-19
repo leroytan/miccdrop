@@ -4,7 +4,6 @@ import React, { useEffect, useState } from 'react';
 import { Text, Image, View, StyleSheet, Pressable } from 'react-native';
 
 const ResultsPage = () => {
-	// Placeholder data
 	const searchParams = useSearchParams(); // Retrieve parameters from the route
 	const songId = searchParams.get('songId'); // Use get method to retrieve the song parameter
 	const score = searchParams.get('score');
@@ -48,7 +47,7 @@ const ResultsPage = () => {
 
 		loadSongInfo();
 	}, [songId]);
-	
+
 	if (loading) {
 		// Show a loading indicator while data is being processed
 		return (
