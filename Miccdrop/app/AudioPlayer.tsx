@@ -15,27 +15,74 @@ import { parse } from "papaparse";
 
 
 
+
+    
 export const SAMPLE_RATE = 16000
 const AUDIO_CHUNK_LENGTH = SAMPLE_RATE * 0.01
 const MAX_POINTS = 300
 const detector = PitchDetector.forFloat32Array(AUDIO_CHUNK_LENGTH); // 10 milliseconds
 detector.minVolumeDecibels = -20;
-export default function AudioPlayer({ songID, setCurrentPitches }
-  : { songID: string, setCurrentPitches: Dispatch<SetStateAction<PitchData[]>> }) {
+export default function AudioPlayer({ songID, setCurrentPitches, instrumental, setInstrumental }
+  : { songID: string, setCurrentPitches: Dispatch<SetStateAction<PitchData[]>>, 
+    instrumental : any , setInstrumental: Dispatch<SetStateAction<any>>
+  }) {
 
-  const [recording, setRecording] = useState<AudioRecording | null>();
-  const [instrumental, setInstrumental] = useState<any>();
-  const [currentPitch, setCurrentPitch] = useState<PitchData | null>(null); // Store detected pitch
-  const [acapellaChunk, setAcapellaChunk] = useState<PitchData[]>([]);
-  let correctPitchData: PitchData[] = [];
-  const [instrumentalLoaded, setInstrumentalLoaded] = useState(false);
-  let currentAudioChunkIndex = 0;
-  const [volume, setVolume] = useState(0.5); // Default volume (1.0 is max)
+    const [recording, setRecording] = useState<AudioRecording | null>();
+    
+    const [currentPitch, setCurrentPitch] = useState<PitchData | null>(null); // Store detected pitch
+    const [acapellaChunk, setAcapellaChunk] = useState<PitchData[]>([]);
+    let correctPitchData : PitchData[] = [];
+    const [instrumentalLoaded, setInstrumentalLoaded] = useState(false);
+    let currentAudioChunkIndex = 0;
+	const [volume, setVolume] = useState(0.5); // Default volume (1.0 is max)
 
   useEffect(() => {
     askPermission();
     async function initializeSound() {
       try {
+          let { data, position, eventDataSize } = event;
+          currentAudioChunkIndex = currentAudioChunkIndex + 1;
+          if (eventDataSize === 0) {
+              console.warn(`Invalid data size=${eventDataSize}`);
+              return;
+          }
+          if (data instanceof Int16Array) {
+            data = Float32Array.from(data, sample => sample / 32768)
+          }
+
+          if (data instanceof Float32Array) {
+              // reshape data
+              let reshapedData = new Float32Array(AUDIO_CHUNK_LENGTH);
+
+              if (data.length > AUDIO_CHUNK_LENGTH) {
+                  // Copy the most recent data if buffer exceeds max length
+                  const startOffset = data.length - AUDIO_CHUNK_LENGTH;
+                  reshapedData = data.slice(startOffset);
+              } else {
+                  // Concatenate buffer if under max length
+                  reshapedData.set(data)
+              }
+              const [pitch, clarity] = detector.findPitch(reshapedData, SAMPLE_RATE);
+              if (clarity > 0.9 && pitch > 65 && pitch < 1047) { // between c2 and c6
+                setCurrentPitch( { "pitch" : pitch, "clarity" : clarity }); 
+                setCurrentPitches((prevPitches) => {
+                  return [...prevPitches, { "pitch" : pitch, "clarity" : clarity }];
+                });   
+              } else {
+                setCurrentPitch({"pitch" : 0, "clarity" : 0});  
+                setCurrentPitches((prevPitches) => {
+                  return [...prevPitches, { "pitch" : 0, "clarity" : 0 }];
+                });    
+              }
+              
+              const parsedData = correctPitchData.slice(currentAudioChunkIndex, MAX_POINTS + currentAudioChunkIndex+1)
+              setAcapellaChunk(parsedData)
+
+              
+          } else if (typeof data === 'string') {
+              // Handle Base64 audio data if needed
+              console.warn(`Unexpected Base64 data received.`);
+          }
         const soundObject = await setUpSound(songID);
         setInstrumental(soundObject); // Update the state after setup is complete
         setInstrumentalLoaded(true);

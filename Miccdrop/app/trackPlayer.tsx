@@ -14,14 +14,15 @@ import { scoring } from "./scoring";
 
 
 function TrackPlayer() {
-	const [lyrics, setLyrics] = useState<string>("");
-	const searchParams = useSearchParams(); // Extract the query parameters
-	const songParam = searchParams.get("song"); // Get the song parameter
-	const song = songParam ? JSON.parse(songParam) : null; // Parse the JSON string
-	const [currentPitches, setCurrentPitches] = useState<PitchData[]>([]); // Store detected pitch
-	let correctPitchData: PitchData[] = [];
+  const [lyrics, setLyrics] = useState<string>("");
+  const searchParams = useSearchParams(); // Extract the query parameters
+  const songParam = searchParams.get("song"); // Get the song parameter
+  const song = songParam ? JSON.parse(songParam) : null; // Parse the JSON string
+  const [currentPitches, setCurrentPitches] = useState<PitchData[]>([]); // Store detected pitch
+  const [correctPitchData, setCorrectPitchData] = useState<PitchData[]>([])
+const [instrumental, setInstrumental] = useState<any>();
+  const { spotify_id: spotifyId, song_name, artist } = song; // Destructure the song object
 
-	const { spotify_id: spotifyId, song_name, artist } = song; // Destructure the song object
 
 
 	const {
@@ -61,8 +62,7 @@ function TrackPlayer() {
 		loadLrcFile();
 	}, [spotifyId]);
 
-
-	useEffect(() => {
+  useEffect(() => {
 
 		const loadCSV = async () => {
 			try {
@@ -83,7 +83,7 @@ function TrackPlayer() {
 
 				const pitchContent = await response.text(); // Retrieve plain text content
 				const parsed = await parseCSV(pitchContent)
-				correctPitchData = parsed;
+				setCorrectPitchData(parsed);
 
 			} catch (error) {
 				console.error("Error loading pitch file:", error);
@@ -101,44 +101,42 @@ function TrackPlayer() {
 	);
 
 
-	return (
-		<LinearGradient
-			colors={["#fbc2eb", "#a6c1ee"]}
-			style={styles.root}
-		>
-			<Text style={styles.headerText}>{song_name}</Text>
-			<Text style={styles.subHeaderText}>by {artist}</Text>
-			{spotifyId !== null && <AudioPlayer songID={spotifyId} setCurrentPitches={setCurrentPitches} />}
-			<Control
-				onPlay={play}
-				onPause={pause}
-				onReset={reset}
-				current={currentMillisecond}
-				setCurrent={setCurrentMillisecond}
-			/>
-			<View style={styles.lrcContainer}>
-				<LyricComponent lrc={lyrics} currentTime={currentMillisecond} />
-			</View>
-			<Pressable
-				style={styles.resultButtonContainer}
-				onPress={() =>
 
-					router.push({
-						pathname: "/results",
-						params: { songId: JSON.stringify(spotifyId), score: scoring(correctPitchData, currentPitches) },
-					})
-				}
-			>
-				<LinearGradient colors={['#f04be5', '#FFB6B6']} start={[0, 0]}
-					end={[1, 2]} style={styles.button}>
-						<Text style={styles.resultButtonText}>View Results</Text>
-				</LinearGradient>
+  return (
+    <View style={styles.root}>
+		{spotifyId !== null && <AudioPlayer 
+    songID = {spotifyId} 
+    setCurrentPitches = { setCurrentPitches} 
+    instrumental = {instrumental}
+    setInstrumental = {setInstrumental}/>}
+      <Control
+        onPlay={play}
+        onPause={pause}
+        onReset={reset}
+        current={currentMillisecond}
+        setCurrent={setCurrentMillisecond}
+      />
+      <ScrollView style={styles.lrcContainer}>
+        <LyricComponent lrc={lyrics} currentTime={currentMillisecond}/>
+      </ScrollView>
+      <Pressable
+        onPress={() => {
+            //stop instrumental
+            instrumental.stopAsync();
+		        instrumental.unloadAsync();
 
-			</Pressable>
-		</LinearGradient>
-	);
+          router.push({
+            pathname: "/results",
+            params: { songId: JSON.stringify(spotifyId), score: scoring(correctPitchData, currentPitches) },
+          })
+        }}
+      >
+        <Text style={styles.resultButton}>Result</Text>
+      </Pressable>
+    </View>
+  );
+	
 }
-
 const styles = StyleSheet.create({
 	button: {
 		backgroundColor: '#ff6f61',

@@ -1,19 +1,24 @@
-import { Text, View,  Animated, Easing } from "react-native";
-import React, {useEffect, useState} from "react"
-import { LineChart, Grid, YAxis } from 'react-native-svg-charts';
+import { Text, View,  Dimensions , Animated, Easing } from "react-native";
+import React, {useEffect, useState, useRef} from "react"
+import { LineChart } from 'react-native-chart-kit';
 import { PitchData } from "../types/pitchData";
 const PITCH_NOTES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
 
 const graphHeight = 200; 
-const graphWidth = 800; 
 const minFreq = 100;
-const maxFreq = 1000; 
+
 
 
 const PitchGraph = ({pitchData, currentPitch} : {pitchData: PitchData[], currentPitch : PitchData | null}) => {
+  const data: number[] = pitchData.map(x => {
+    const pitch = x?.pitch ?? minFreq + 1; // Handle null/undefined values
+    return pitch > 783 ? 0 : pitch - minFreq - 1; // Set to 0 if pitch > 783, otherwise transform
+  });
 
-  const [verticalPos, setVerticalPos] = useState(new Animated.Value(0)); // for pitch (vertical)
+  let maxFreq = Math.max(...data)
+  maxFreq = (maxFreq == 0) ? 400 : maxFreq
+  const verticalPos = useRef(new Animated.Value(0)).current; // for pitch (vertical)
   useEffect(() => {
     // Vertical animation: based on current pitch
     Animated.timing(verticalPos, {
@@ -30,55 +35,49 @@ const PitchGraph = ({pitchData, currentPitch} : {pitchData: PitchData[], current
     if (pitch !== null && pitch !== undefined && (pitch.pitch ?? 0 )!= 0 ) {
       const graphPitchRange = maxFreq - minFreq;
       const normalizedPitch = (maxFreq - (pitch.pitch ?? 0)) / graphPitchRange;
-      const newHeight = graphHeight * normalizedPitch - 30;// Vertical position as a percentage of graph height
+      const newHeight = graphHeight * normalizedPitch;// Vertical position as a percentage of graph height
       return (newHeight > 0) ? Math.min(newHeight, graphHeight): graphHeight;
     
     } else {
       return graphHeight;
     }
   };
-  const data = pitchData.map(x => x.pitch)
+  
+  
 
+  // Simulate continuous data
+  
 
-  const verticalContentInset = { top: 10, bottom: 10 }
-  const axesSvg = { fontSize: 10, fill: 'grey' };
   return (
-    <View >
-       <View style={{ height: graphHeight, width : graphWidth, flexDirection: 'row' }}>
-                <YAxis
-                    data={data}
-                    min={minFreq}
-                    max={maxFreq}
-                    contentInset={verticalContentInset}
-                    svg={axesSvg}
-                />
-                <View style={{ flex: 1, marginLeft: 10 }}>
-                    <LineChart
-                        style={{ flex: 1 }}
-                        data={data}
-                        gridMin={minFreq}
-                        gridMax={maxFreq}
-                        contentInset={verticalContentInset}
-
-                    >
-                        <Grid/>
-                    </LineChart>
-                    <Animated.View
+    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <LineChart
+        data={{
+          datasets: [
+            {
+              data: data.length > 0 ? data : [0], // Handle empty data
+            },
+          ],
+          labels : []
+        }}
+        width={Dimensions.get('window').width - 20}
+        height={graphHeight}
+        bezier
+        chartConfig={{
+          color: (opacity = 3) => `rgba(200, 255, 255, ${opacity})`
+        }}
+      />
+      <Animated.View
                   style={{
                     position: 'absolute',
                     top: verticalPos, // Moves up/down with the pitch
                     left : 30,
                     width: 5, // Adjust size
                     height: 5, // Adjust size
-                    backgroundColor: 'red', // Indicator color
+                    backgroundColor: 'pink', // Indicator color
                   }}
                 />
-                </View>
-
-                
-            </View>
-
     </View>
+      
   );
 };
 
