@@ -19,10 +19,11 @@ function TrackPlayer() {
 	const songParam = searchParams.get("song"); // Get the song parameter
 	const song = songParam ? JSON.parse(songParam) : null; // Parse the JSON string
 	const [currentPitches, setCurrentPitches] = useState<PitchData[]>([]); // Store detected pitch
-	let correctPitchData: PitchData[] = [];
-
+	const [correctPitchData, setCorrectPitchData] = useState<PitchData[]>([])
+  const [instrumental, setInstrumental] = useState<any>();
 	const { spotify_id: spotifyId, song_name, artist } = song; // Destructure the song object
-	const timerConstant = 2.05; // Magic??? Somehow this syncs up.
+  
+	  const timerConstant = 2.05; // Magic??? Somehow this syncs up.
 
 	const {
 		currentMillisecond,
@@ -83,7 +84,7 @@ function TrackPlayer() {
 
 				const pitchContent = await response.text(); // Retrieve plain text content
 				const parsed = await parseCSV(pitchContent)
-				correctPitchData = parsed;
+				setCorrectPitchData(parsed);
 
 			} catch (error) {
 				console.error("Error loading pitch file:", error);
@@ -114,8 +115,12 @@ function TrackPlayer() {
 			</Pressable>
 			<Text style={styles.headerText}>{song_name}</Text>
 			<Text style={styles.subHeaderText}>by {artist}</Text>
-			{spotifyId !== null && <AudioPlayer songID={spotifyId} setCurrentPitches={setCurrentPitches} />}
-			<Control
+			{spotifyId !== null && <AudioPlayer 
+    songID = {spotifyId} 
+    setCurrentPitches = { setCurrentPitches} 
+    instrumental = {instrumental}
+    setInstrumental = {setInstrumental}/>}
+	<Control
 				handlePlay={play}
 				onPause={pause}
 				onReset={reset}
@@ -128,7 +133,8 @@ function TrackPlayer() {
 			<Pressable
 				style={styles.resultButtonContainer}
 				onPress={() =>
-
+					instrumental.stopAsync();
+					instrumental.unloadAsync();
 					router.push({
 						pathname: "/results",
 						params: { songId: JSON.stringify(spotifyId), score: scoring(correctPitchData, currentPitches) },
