@@ -1,9 +1,11 @@
 import { PitchData } from "@/types/pitchData"
 
 export const scoring = (correct : PitchData[], sangNotes : PitchData[]) => {
+
+
 	const getFrequencyDifferenceScore = (freq1 : PitchData, freq2: PitchData) => {
-		const pitch1 = freq1.pitch;
-		const pitch2 = freq2.pitch;
+		const pitch1 = freq1?.pitch ?? 0 ;
+		const pitch2 = freq2?.pitch ?? 0;
 		const semitones = 12; // Number of semitones in an octave	
 		const A4 = 440; // Reference frequency for A4
 		if (pitch1 && pitch2) {
@@ -26,10 +28,10 @@ export const scoring = (correct : PitchData[], sangNotes : PitchData[]) => {
 	  };
 	
 	  // Calculate the score for each pair of frequencies
-	  const scores = correct.map((freq1, i) => {
+	  const scores : number[] = correct.map((freq1, i) => {
 		const freq2 = sangNotes[i];
 		return getFrequencyDifferenceScore(freq1, freq2);
 	  });
 	
-	  return scores;
+	  return scores.reduce((a, b) => a + b).toFixed(2);
 }

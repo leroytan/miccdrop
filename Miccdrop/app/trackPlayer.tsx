@@ -18,7 +18,7 @@ function TrackPlayer() {
   const songParam = searchParams.get("song"); // Get the song parameter
   const song = songParam ? JSON.parse(songParam) : null; // Parse the JSON string
   const [currentPitches, setCurrentPitches] = useState<PitchData[]>([]); // Store detected pitch
-  let correctPitchData : PitchData[] = [];
+  const [correctPitchData, setCorrectPitchData] = useState<PitchData[]>([])
 
   const { spotify_id: spotifyId, song_name, artist } = song; // Destructure the song object
 
@@ -72,6 +72,7 @@ function TrackPlayer() {
                   method: 'POST', // Specify the method
                   headers: {
                     'Content-Type': 'application/json', 
+                    'Authorization': `Bearer sth sth`,
                   },
                 }
               );
@@ -82,7 +83,7 @@ function TrackPlayer() {
       
               const pitchContent = await response.text(); // Retrieve plain text content
               const parsed = await parseCSV(pitchContent)
-              correctPitchData = parsed;
+              setCorrectPitchData(parsed)
               
               } catch (error) {
               console.error("Error loading pitch file:", error);
@@ -91,7 +92,7 @@ function TrackPlayer() {
   
           loadCSV();
           
-      }, []); 
+      }, [spotifyId]); 
 
   const lineRenderer = ({ active, line: { content } }: { active: boolean; line: LrcLine }) => (
 

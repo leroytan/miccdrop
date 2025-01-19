@@ -131,9 +131,10 @@
                   return [...prevPitches, { "pitch" : 0, "clarity" : 0 }];
                 });    
               }
-
+              
               const parsedData = correctPitchData.slice(currentAudioChunkIndex, MAX_POINTS + currentAudioChunkIndex+1)
               setAcapellaChunk(parsedData)
+
               
           } else if (typeof data === 'string') {
               // Handle Base64 audio data if needed
