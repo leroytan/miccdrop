@@ -15,16 +15,17 @@ import { parse } from "papaparse";
 
 
 
-<<<<<<< HEAD
-  export const SAMPLE_RATE = 16000
-  const AUDIO_CHUNK_LENGTH = SAMPLE_RATE * 0.01
-  const MAX_POINTS = 300
-  const detector = PitchDetector.forFloat32Array(AUDIO_CHUNK_LENGTH); // 10 milliseconds
-  detector.minVolumeDecibels = -20;
-  export default function AudioPlayer({songID, setCurrentPitches, instrumental, setInstrumental} 
-    : {songID : string, setCurrentPitches : Dispatch<SetStateAction<PitchData[]>>, 
-      instrumental : any, setInstrumental : Dispatch<SetStateAction<any>>
-    }) {
+
+    
+export const SAMPLE_RATE = 16000
+const AUDIO_CHUNK_LENGTH = SAMPLE_RATE * 0.01
+const MAX_POINTS = 300
+const detector = PitchDetector.forFloat32Array(AUDIO_CHUNK_LENGTH); // 10 milliseconds
+detector.minVolumeDecibels = -20;
+export default function AudioPlayer({ songID, setCurrentPitches, instrumental, setInstrumental }
+  : { songID: string, setCurrentPitches: Dispatch<SetStateAction<PitchData[]>>, 
+    instrumental : any , setInstrumental: Dispatch<SetStateAction<any>>
+  }) {
 
     const [recording, setRecording] = useState<AudioRecording | null>();
     
@@ -34,30 +35,11 @@ import { parse } from "papaparse";
     const [instrumentalLoaded, setInstrumentalLoaded] = useState(false);
     let currentAudioChunkIndex = 0;
 	const [volume, setVolume] = useState(0.5); // Default volume (1.0 is max)
-=======
-export const SAMPLE_RATE = 16000
-const AUDIO_CHUNK_LENGTH = SAMPLE_RATE * 0.01
-const MAX_POINTS = 300
-const detector = PitchDetector.forFloat32Array(AUDIO_CHUNK_LENGTH); // 10 milliseconds
-detector.minVolumeDecibels = -20;
-export default function AudioPlayer({ songID, setCurrentPitches }
-  : { songID: string, setCurrentPitches: Dispatch<SetStateAction<PitchData[]>> }) {
->>>>>>> 834c4211d2e9c0ce8fa3503ca53f6a00501def4f
-
-  const [recording, setRecording] = useState<AudioRecording | null>();
-  const [instrumental, setInstrumental] = useState<any>();
-  const [currentPitch, setCurrentPitch] = useState<PitchData | null>(null); // Store detected pitch
-  const [acapellaChunk, setAcapellaChunk] = useState<PitchData[]>([]);
-  let correctPitchData: PitchData[] = [];
-  const [instrumentalLoaded, setInstrumentalLoaded] = useState(false);
-  let currentAudioChunkIndex = 0;
-  const [volume, setVolume] = useState(0.5); // Default volume (1.0 is max)
 
   useEffect(() => {
     askPermission();
     async function initializeSound() {
       try {
-<<<<<<< HEAD
           let { data, position, eventDataSize } = event;
           currentAudioChunkIndex = currentAudioChunkIndex + 1;
           if (eventDataSize === 0) {
@@ -101,11 +83,9 @@ export default function AudioPlayer({ songID, setCurrentPitches }
               // Handle Base64 audio data if needed
               console.warn(`Unexpected Base64 data received.`);
           }
-=======
         const soundObject = await setUpSound(songID);
         setInstrumental(soundObject); // Update the state after setup is complete
         setInstrumentalLoaded(true);
->>>>>>> 834c4211d2e9c0ce8fa3503ca53f6a00501def4f
       } catch (error) {
         console.error("Error setting up sound:", error);
       }
