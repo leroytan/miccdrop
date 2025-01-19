@@ -337,7 +337,7 @@ app.get("/api/v1/getSong", async (req, res) => {
     // Fetch the song details from the database
     const { data, error } = await supabase
       .from("songs")
-      .select("song_name, lyrics_url, image_url, artist") // Include 'song_name', 'lyrics_url', 'image_url', 'artist'
+      .select("song_name, artist, images") // Include 'song_name', 'lyrics_url', 'image_url', 'artist'
       .eq("spotify_id", id)
       .single();
 
@@ -356,21 +356,12 @@ app.get("/api/v1/getSong", async (req, res) => {
       });
     }
 
-    // Check if the song has a lyrics_url
-    if (!data.lyrics_url) {
-      return res.status(404).json({
-        status: "error",
-        message: "Lyrics file not found for the given song.",
-      });
-    }
 
-    // Return the song details
     return res.status(200).json({
       status: "success",
       song_name: data.song_name,
-      image_url: data.image_url,
       artist: data.artist,
-      lyrics_url: data.lyrics_url,
+      image_url: data.images
     });
   } catch (err) {
     console.error("Unexpected error fetching song:", err);
@@ -385,11 +376,11 @@ app.get("/api/v1/getSong", async (req, res) => {
 
 //Pitch detection API
 
-const linkPitchToSong = async () => {
-  const bucketName = "pitches"; // Replace with your bucket name
+const linkInstrumentalToSong = async () => {
+  const bucketName = "instrumentals"; // Replace with your bucket name
 
   try {
-    console.log("Linking pitches to songs...");
+    console.log("Linking instrumentals to songs...");
     const { data: files, error: listError } = await supabaseServiceRole.storage
       .from(bucketName)
       .list();
@@ -401,7 +392,7 @@ const linkPitchToSong = async () => {
 
     for (const file of files) {
       const fileName = file.name; 
-      const spotifyId = fileName.replace(".csv", ""); 
+      const spotifyId = fileName.replace(".wav", ""); 
 
       const { data: publicUrlData, error: urlError } = supabaseServiceRole.storage
         .from(bucketName)
@@ -415,7 +406,7 @@ const linkPitchToSong = async () => {
       // Update the songs table with the lyrics URL
       const { error: updateError } = await supabase
         .from("songs")
-        .update({ pitch_url: publicUrlData.publicUrl })
+        .update({ instrumental_url: publicUrlData.publicUrl })
         .eq("spotify_id", spotifyId); 
 
       if (updateError) {
@@ -429,16 +420,15 @@ const linkPitchToSong = async () => {
       console.log(`Updated song with Spotify ID ${spotifyId} successfully.`);
     }
 
-    console.log("Pitches successfully linked to songs.");
+    console.log("Instrumentals successfully linked to songs.");
   } catch (err) {
-    console.error("Error linking pitches to songs:", err);
+    console.error("Error linking instrumentals to songs:", err);
   }
 };
-linkPitchToSong();
+linkInstrumentalToSong();
 
 
-
-app.post("/api/v1/getPitch", async (req, res) => {
+app.post("/api/v1/getInstrumental", async (req, res) => {
   const { id } = req.query; // Extract 'id' from the query parameters
   if (!id) {
     return res.status(400).json({
@@ -448,9 +438,10 @@ app.post("/api/v1/getPitch", async (req, res) => {
   }
 
   try {
+    // Fetch the instrumental URL from the database
     const { data, error } = await supabase
       .from("songs")
-      .select("pitch_url") // Only fetch the `pitch_url` field
+      .select("instrumental_url")
       .eq("spotify_id", id)
       .single();
 
@@ -462,26 +453,27 @@ app.post("/api/v1/getPitch", async (req, res) => {
       });
     }
 
-    if (!data || !data.pitch_url) {
+    if (!data || !data.instrumental_url) {
       return res.status(404).json({
         status: "error",
-        message: "CSV file not found for the given song.",
+        message: "WAV file not found for the given song.",
       });
     }
 
-    // Fetch the CSV file from the provided URL
-    const csvResponse = await fetch(data.pitch_url);
-    if (!csvResponse.ok) {
-      throw new Error(`Failed to fetch CSV file: ${csvResponse.statusText}`);
-    }
+    const instrumentalUrl = data.instrumental_url;
 
-    const csvContent = await csvResponse.text(); // Read the CSV as plain text
+    const axios = require("axios");
+    const response = await axios.get(instrumentalUrl, { responseType: "arraybuffer" });
 
-    // Send the CSV content with the appropriate headers
-    res.setHeader("Content-Type", "text/csv");
-    return res.status(200).send(csvContent);
+    res.setHeader("Content-Type", "audio/wav");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename="${id}.wav"`
+    );
+
+    return res.send(response.data);
   } catch (err) {
-    console.error("Unexpected error fetching CSV:", err);
+    console.error("Unexpected error fetching WAV file:", err);
     return res.status(500).json({
       status: "error",
       message: "An unexpected error occurred.",
