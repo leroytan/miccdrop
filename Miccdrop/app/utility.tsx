@@ -16,22 +16,30 @@ export const askPermission = async () => {
   }
   
   export const setUpSound = async (songID : string) => { 
-    // const response = await fetch(`/assets/audios/${songID}.wav`);
-    // if (!response.ok) {
-    //   throw new Error('Failed to load audio file');
-    // }
+    const response = await fetch(
+      `http://${process.env.EXPO_PUBLIC_LOCALHOST}:3001/api/v1/getInstrumental?id=${songID}` ,
+      {
+        method: 'POST', // Specify the method
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    if (!response.ok) {
+      throw new Error('Failed to load audio file');
+    }
 
-    // // Convert the Blob into a URI using URL.createObjectURL
-    // const audioBlob = await response.blob();
-    // const audioURL = URL.createObjectURL(audioBlob); // Create a URL from the Blob
+    // Convert the Blob into a URI using URL.createObjectURL
+    const audioBlob = await response.blob();
+    const audioURL = URL.createObjectURL(audioBlob); // Create a URL from the Blob
 
-    // // Load the sound using the URI created from the Blob
-    // const { sound } = await Audio.Sound.createAsync(
-    //   { uri: audioURL } // Pass the URI to Audio.Sound.createAsync
-    // );
-    // return sound 
-    const { sound } = await Audio.Sound.createAsync( require("../assets/audios/1GEBsLDvJGw7kviySRI6GX.wav") 
-    ); 
+    // Load the sound using the URI created from the Blob
+    const { sound } = await Audio.Sound.createAsync(
+      { uri: audioURL } // Pass the URI to Audio.Sound.createAsync
+    );
+    return sound 
+    // const { sound } = await Audio.Sound.createAsync( require("../assets/audios/1GEBsLDvJGw7kviySRI6GX.wav") 
+    // ); 
   return sound 
   }
 
