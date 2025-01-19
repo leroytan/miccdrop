@@ -337,7 +337,7 @@ app.get("/api/v1/getSong", async (req, res) => {
     // Fetch the song details from the database
     const { data, error } = await supabase
       .from("songs")
-      .select("song_name, lyrics_url, image_url, artist") // Include 'song_name', 'lyrics_url', 'image_url', 'artist'
+      .select("song_name, artist, images") // Include 'song_name', 'lyrics_url', 'image_url', 'artist'
       .eq("spotify_id", id)
       .single();
 
@@ -356,21 +356,12 @@ app.get("/api/v1/getSong", async (req, res) => {
       });
     }
 
-    // Check if the song has a lyrics_url
-    if (!data.lyrics_url) {
-      return res.status(404).json({
-        status: "error",
-        message: "Lyrics file not found for the given song.",
-      });
-    }
 
-    // Return the song details
     return res.status(200).json({
       status: "success",
       song_name: data.song_name,
-      image_url: data.image_url,
       artist: data.artist,
-      lyrics_url: data.lyrics_url,
+      image_url: data.images
     });
   } catch (err) {
     console.error("Unexpected error fetching song:", err);
@@ -463,7 +454,6 @@ app.post("/api/v1/getPitch", async (req, res) => {
     }
 
     if (!data || !data.pitch_url) {
-      console.log(data) //TODO
       return res.status(404).json({
         status: "error",
         message: "CSV file not found for the given song.",
