@@ -19,7 +19,7 @@ function TrackPlayer() {
   const song = songParam ? JSON.parse(songParam) : null; // Parse the JSON string
   const [currentPitches, setCurrentPitches] = useState<PitchData[]>([]); // Store detected pitch
   const [correctPitchData, setCorrectPitchData] = useState<PitchData[]>([])
-
+const [instrumental, setInstrumental] = useState<any>();
   const { spotify_id: spotifyId, song_name, artist } = song; // Destructure the song object
 
 
@@ -103,7 +103,11 @@ function TrackPlayer() {
 
   return (
     <View style={styles.root}>
-		{spotifyId !== null && <AudioPlayer songID = {spotifyId} setCurrentPitches = { setCurrentPitches}/>}
+		{spotifyId !== null && <AudioPlayer 
+    songID = {spotifyId} 
+    setCurrentPitches = { setCurrentPitches} 
+    instrumental = {instrumental}
+    setInstrumental = {setInstrumental}/>}
       <Control
         onPlay={play}
         onPause={pause}
@@ -115,13 +119,16 @@ function TrackPlayer() {
         <LyricComponent lrc={lyrics} currentTime={currentMillisecond}/>
       </ScrollView>
       <Pressable
-        onPress={() =>
-  
+        onPress={() => {
+            //stop instrumental
+            instrumental.stopAsync();
+		        instrumental.unloadAsync();
+
           router.push({
             pathname: "/results",
             params: { songId: JSON.stringify(spotifyId), score: scoring(correctPitchData, currentPitches) },
           })
-        }
+        }}
       >
         <Text style={styles.resultButton}>Result</Text>
       </Pressable>

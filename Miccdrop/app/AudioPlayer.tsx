@@ -20,11 +20,13 @@
   const MAX_POINTS = 300
   const detector = PitchDetector.forFloat32Array(AUDIO_CHUNK_LENGTH); // 10 milliseconds
   detector.minVolumeDecibels = -20;
-  export default function AudioPlayer({songID, setCurrentPitches} 
-    : {songID : string, setCurrentPitches : Dispatch<SetStateAction<PitchData[]>>}) {
-    
+  export default function AudioPlayer({songID, setCurrentPitches, instrumental, setInstrumental} 
+    : {songID : string, setCurrentPitches : Dispatch<SetStateAction<PitchData[]>>, 
+      instrumental : any, setInstrumental : Dispatch<SetStateAction<any>>
+    }) {
+
     const [recording, setRecording] = useState<AudioRecording | null>();
-    const [instrumental, setInstrumental] = useState<any>();
+    
     const [currentPitch, setCurrentPitch] = useState<PitchData | null>(null); // Store detected pitch
     const [acapellaChunk, setAcapellaChunk] = useState<PitchData[]>([]);
     let correctPitchData : PitchData[] = [];
