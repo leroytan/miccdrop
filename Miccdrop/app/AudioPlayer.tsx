@@ -217,8 +217,6 @@ export default function AudioPlayer({ songID, setCurrentPitches }
         maximumTrackTintColor="#d3d3d3"
         thumbTintColor="#1EB1FC"
       />
-
-
     </View>
   )
 }

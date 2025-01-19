@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Pressable, Text, View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
+import { Pressable, Text, Image, View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { Lrc, LrcLine, useRecoverAutoScrollImmediately } from "react-lrc";
 import { LinearGradient } from "expo-linear-gradient";
 import useTimer from "../components/useTimer";
@@ -22,7 +22,7 @@ function TrackPlayer() {
 	let correctPitchData: PitchData[] = [];
 
 	const { spotify_id: spotifyId, song_name, artist } = song; // Destructure the song object
-
+	const timerConstant = 2.05; // Magic??? Somehow this syncs up.
 
 	const {
 		currentMillisecond,
@@ -30,7 +30,7 @@ function TrackPlayer() {
 		reset,
 		play,
 		pause,
-	} = useTimer(1.02);
+	} = useTimer(timerConstant);
 
 
 	useEffect(() => {
@@ -106,11 +106,17 @@ function TrackPlayer() {
 			colors={["#fbc2eb", "#a6c1ee"]}
 			style={styles.root}
 		>
+			<Pressable style={styles.backButton} onPress={() => router.back()}>
+				<Image
+					source={require('../assets/images/backIcon.png')}
+					style={styles.backIcon}
+				/>
+			</Pressable>
 			<Text style={styles.headerText}>{song_name}</Text>
 			<Text style={styles.subHeaderText}>by {artist}</Text>
 			{spotifyId !== null && <AudioPlayer songID={spotifyId} setCurrentPitches={setCurrentPitches} />}
 			<Control
-				onPlay={play}
+				handlePlay={play}
 				onPause={pause}
 				onReset={reset}
 				current={currentMillisecond}
@@ -140,6 +146,24 @@ function TrackPlayer() {
 }
 
 const styles = StyleSheet.create({
+	backButton: {
+		position: 'absolute',
+		top: 20,
+		left: 20,
+		zIndex: 1,
+		backgroundColor: '#ffffff',
+		borderRadius: 15,
+		padding: 10,
+		shadowColor: '#000',
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.2,
+		shadowRadius: 4,
+	},
+	backIcon: {
+		width: 20,
+		height: 20,
+		tintColor: '#344e76',
+	},
 	button: {
 		backgroundColor: '#ff6f61',
 		paddingVertical: 10,
