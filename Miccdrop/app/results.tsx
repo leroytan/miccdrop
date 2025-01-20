@@ -22,7 +22,7 @@ const ResultsPage = () => {
 			}
 
 			try {
-				// Fetch song details from the backend TO CHANGE
+				// Post the songId to the backend to get image data
 				const songData = await fetch(
 					`http://${process.env.EXPO_PUBLIC_LOCALHOST}:3001/api/v1/getSong`,
 					{
@@ -66,6 +66,7 @@ const ResultsPage = () => {
 	const albumCover = image_url ? image_url : "https://i.scdn.co/image/ab67616d0000b27360cb9332e8c8c7d8e50854b3";
 	const songName = name ? name : "You Belong With Me";
 	const songArtist = artist ? artist : "Taylor Swift";
+
 	return (
 		<LinearGradient
 			colors={['#94bbe9', '#fad0c4']}
@@ -88,13 +89,6 @@ const ResultsPage = () => {
 					<Text style={styles.editButtonText}>Back to Home!</Text>
 				</TouchableOpacity>
 			</LinearGradient>
-			{/* <LinearGradient colors={['#f04be5', '#FFB6B6']} start={[0, 0]}
-				end={[1, 2]} style={styles.editButton}>
-				<TouchableOpacity onPress={() => router.push({ "pathname": '/trackPlayer', "params": { "songId": songId } })}>
-					<Text style={styles.editButtonText}>Play Again!</Text>
-				</TouchableOpacity>
-			</LinearGradient> */}
-
 		</LinearGradient>
 	);
 };

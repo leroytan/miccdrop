@@ -33,9 +33,9 @@ function Control({
 			</TouchableOpacity>
 			<TextInput
 				style={styles.input}
-				keyboardType="numeric"
 				value={current.toString()}
 				onChangeText={(text) => setCurrent(Number(text))}
+				editable={false}
 			/>
 		</View>
 	);
@@ -69,6 +69,8 @@ const styles = StyleSheet.create({
 		tintColor: '#344e76',
 	},
 	input: {
+		fontFamily: 'monospace',
+		fontSize: 16,
 		borderWidth: 1,
 		borderColor: '#ccc',
 		padding: 10,

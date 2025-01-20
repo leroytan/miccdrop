@@ -20,10 +20,10 @@ function TrackPlayer() {
 	const song = songParam ? JSON.parse(songParam) : null; // Parse the JSON string
 	const [currentPitches, setCurrentPitches] = useState<PitchData[]>([]); // Store detected pitch
 	const [correctPitchData, setCorrectPitchData] = useState<PitchData[]>([])
-  const [instrumental, setInstrumental] = useState<any>();
+	const [instrumental, setInstrumental] = useState<any>();
 	const { spotify_id: spotifyId, song_name, artist } = song; // Destructure the song object
-  
-	  const timerConstant = 2.05; // Magic??? Somehow this syncs up.
+
+	const timerConstant = 2.9; // Magic??? Somehow this syncs up.
 
 	const {
 		currentMillisecond,
@@ -93,7 +93,7 @@ function TrackPlayer() {
 
 		loadCSV();
 
-	}, []);
+	}, [spotifyId]);
 
 	const lineRenderer = ({ active, line: { content } }: { active: boolean; line: LrcLine }) => (
 
@@ -115,15 +115,15 @@ function TrackPlayer() {
 			</Pressable>
 			<Text style={styles.headerText}>{song_name}</Text>
 			<Text style={styles.subHeaderText}>by {artist}</Text>
-			{spotifyId !== null && <AudioPlayer 
-    songID = {spotifyId} 
-    setCurrentPitches = { setCurrentPitches} 
-    instrumental = {instrumental}
-    setInstrumental = {setInstrumental}/>}
-	<Control
+			{spotifyId !== null && <AudioPlayer
+				songID={spotifyId}
+				setCurrentPitches={setCurrentPitches}
+				instrumental={instrumental}
+				setInstrumental={setInstrumental} />}
+			<Control
 				handlePlay={play}
-				onPause={pause}
-				onReset={reset}
+				handlePause={pause}
+				handleStop={reset}
 				current={currentMillisecond}
 				setCurrent={setCurrentMillisecond}
 			/>
@@ -132,22 +132,22 @@ function TrackPlayer() {
 			</View>
 			<Pressable
 				style={styles.resultButtonContainer}
-				onPress={() =>
+				onPress={() => {
 					instrumental.stopAsync();
 					instrumental.unloadAsync();
 					router.push({
 						pathname: "/results",
 						params: { songId: JSON.stringify(spotifyId), score: scoring(correctPitchData, currentPitches) },
 					})
-				}
+				}}
 			>
 				<LinearGradient colors={['#f04be5', '#FFB6B6']} start={[0, 0]}
 					end={[1, 2]} style={styles.button}>
-						<Text style={styles.resultButtonText}>View Results</Text>
+					<Text style={styles.resultButtonText}>View Results</Text>
 				</LinearGradient>
 
 			</Pressable>
-		</LinearGradient>
+		</LinearGradient >
 	);
 }
 
