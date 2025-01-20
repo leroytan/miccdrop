@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Pressable, Text, View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
+import { Pressable, Text, Image, View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { Lrc, LrcLine, useRecoverAutoScrollImmediately } from "react-lrc";
 import { LinearGradient } from "expo-linear-gradient";
 import useTimer from "../components/useTimer";
@@ -14,16 +14,16 @@ import { scoring } from "./scoring";
 
 
 function TrackPlayer() {
-  const [lyrics, setLyrics] = useState<string>("");
-  const searchParams = useSearchParams(); // Extract the query parameters
-  const songParam = searchParams.get("song"); // Get the song parameter
-  const song = songParam ? JSON.parse(songParam) : null; // Parse the JSON string
-  const [currentPitches, setCurrentPitches] = useState<PitchData[]>([]); // Store detected pitch
-  const [correctPitchData, setCorrectPitchData] = useState<PitchData[]>([])
-const [instrumental, setInstrumental] = useState<any>();
-  const { spotify_id: spotifyId, song_name, artist } = song; // Destructure the song object
+	const [lyrics, setLyrics] = useState<string>("");
+	const searchParams = useSearchParams(); // Extract the query parameters
+	const songParam = searchParams.get("song"); // Get the song parameter
+	const song = songParam ? JSON.parse(songParam) : null; // Parse the JSON string
+	const [currentPitches, setCurrentPitches] = useState<PitchData[]>([]); // Store detected pitch
+	const [correctPitchData, setCorrectPitchData] = useState<PitchData[]>([])
+	const [instrumental, setInstrumental] = useState<any>();
+	const { spotify_id: spotifyId, song_name, artist } = song; // Destructure the song object
 
-
+	const timerConstant = 2.9; // Magic??? Somehow this syncs up.
 
 	const {
 		currentMillisecond,
@@ -31,7 +31,7 @@ const [instrumental, setInstrumental] = useState<any>();
 		reset,
 		play,
 		pause,
-	} = useTimer(1.02);
+	} = useTimer(timerConstant);
 
 
 	useEffect(() => {
@@ -62,7 +62,8 @@ const [instrumental, setInstrumental] = useState<any>();
 		loadLrcFile();
 	}, [spotifyId]);
 
-  useEffect(() => {
+
+	useEffect(() => {
 
 		const loadCSV = async () => {
 			try {
@@ -92,7 +93,7 @@ const [instrumental, setInstrumental] = useState<any>();
 
 		loadCSV();
 
-	}, []);
+	}, [spotifyId]);
 
 	const lineRenderer = ({ active, line: { content } }: { active: boolean; line: LrcLine }) => (
 
@@ -101,43 +102,74 @@ const [instrumental, setInstrumental] = useState<any>();
 	);
 
 
+	return (
+		<LinearGradient
+			colors={["#fbc2eb", "#a6c1ee"]}
+			style={styles.root}
+		>
+			<Pressable style={styles.backButton} onPress={() => router.back()}>
+				<Image
+					source={require('../assets/images/backIcon.png')}
+					style={styles.backIcon}
+				/>
+			</Pressable>
+			<Text style={styles.headerText}>{song_name}</Text>
+			<Text style={styles.subHeaderText}>by {artist}</Text>
+			{spotifyId !== null && <AudioPlayer
+				songID={spotifyId}
+				setCurrentPitches={setCurrentPitches}
+				instrumental={instrumental}
+				setInstrumental={setInstrumental} />}
+			<Control
+				handlePlay={play}
+				handlePause={pause}
+				handleStop={reset}
+				current={currentMillisecond}
+				setCurrent={setCurrentMillisecond}
+			/>
+			<View style={styles.lrcContainer}>
+				<LyricComponent lrc={lyrics} currentTime={currentMillisecond} />
+			</View>
+			<Pressable
+				style={styles.resultButtonContainer}
+				onPress={() => {
+					instrumental.stopAsync();
+					instrumental.unloadAsync();
+					router.push({
+						pathname: "/results",
+						params: { songId: JSON.stringify(spotifyId), score: scoring(correctPitchData, currentPitches) },
+					})
+				}}
+			>
+				<LinearGradient colors={['#f04be5', '#FFB6B6']} start={[0, 0]}
+					end={[1, 2]} style={styles.button}>
+					<Text style={styles.resultButtonText}>View Results</Text>
+				</LinearGradient>
 
-  return (
-    <View style={styles.root}>
-		{spotifyId !== null && <AudioPlayer 
-    songID = {spotifyId} 
-    setCurrentPitches = { setCurrentPitches} 
-    instrumental = {instrumental}
-    setInstrumental = {setInstrumental}/>}
-      <Control
-        onPlay={play}
-        onPause={pause}
-        onReset={reset}
-        current={currentMillisecond}
-        setCurrent={setCurrentMillisecond}
-      />
-      <ScrollView style={styles.lrcContainer}>
-        <LyricComponent lrc={lyrics} currentTime={currentMillisecond}/>
-      </ScrollView>
-      <Pressable
-        onPress={() => {
-            //stop instrumental
-            instrumental.stopAsync();
-		        instrumental.unloadAsync();
-
-          router.push({
-            pathname: "/results",
-            params: { songId: JSON.stringify(spotifyId), score: scoring(correctPitchData, currentPitches) },
-          })
-        }}
-      >
-        <Text style={styles.resultButton}>Result</Text>
-      </Pressable>
-    </View>
-  );
-	
+			</Pressable>
+		</LinearGradient >
+	);
 }
+
 const styles = StyleSheet.create({
+	backButton: {
+		position: 'absolute',
+		top: 20,
+		left: 20,
+		zIndex: 1,
+		backgroundColor: '#ffffff',
+		borderRadius: 15,
+		padding: 10,
+		shadowColor: '#000',
+		shadowOffset: { width: 0, height: 2 },
+		shadowOpacity: 0.2,
+		shadowRadius: 4,
+	},
+	backIcon: {
+		width: 20,
+		height: 20,
+		tintColor: '#344e76',
+	},
 	button: {
 		backgroundColor: '#ff6f61',
 		paddingVertical: 10,

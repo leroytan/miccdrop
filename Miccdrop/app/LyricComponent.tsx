@@ -18,15 +18,18 @@ const LyricComponent = ({ lrc, currentTime } :any) => {
       style={{ height: 500 }}
       lrc={lrc}
       currentTime={currentTime}
-      lineHeight={16}
+      lineHeight={70}
+      activeLineHeight={90}
+      autoScroll={true}
       lineRenderer={lineRenderer}
+      autoScrollAfterUserScroll={4000}
     />
   );
 };
 
 const styles = StyleSheet.create({
   line: {
-		fontSize: 18,
+		fontSize: 20,
 		textAlign: "center",
 		color: "#344e76",
 		paddingVertical: 5,

@@ -2,41 +2,41 @@ import React from 'react';
 import { View, Text, Image, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
 
 function Control({
-	onPlay,
-	onPause,
-	onReset,
+	handlePlay,
+	handlePause,
+	handleStop,
 	current,
 	setCurrent,
 }: {
-	onPlay: () => void;
-	onPause: () => void;
-	onReset: () => void;
+	handlePlay: () => void;
+	handlePause: () => void;
+	handleStop: () => void;
 	current: number;
 	setCurrent: (c: number) => void;
 }) {
 	return (
 		<View style={styles.container}>
-			<TouchableOpacity onPress={onPlay}>
+			<TouchableOpacity onPress={handlePlay}>
 				<Image
 					source={require("../assets/images/play-button-arrowhead.png")}
 					style={styles.icon} />
 			</TouchableOpacity>
-			<TouchableOpacity onPress={onPause}>
+			<TouchableOpacity onPress={handlePause}>
 			<Image
 					source={require("../assets/images/pause.png")}
 					style={styles.icon} />
 			</TouchableOpacity>
-			<TouchableOpacity onPress={onReset}>
+			<TouchableOpacity onPress={handleStop}>
 			<Image
 					source={require("../assets/images/stop-button.png")}
 					style={styles.icon} />
 			</TouchableOpacity>
-			{/* <TextInput
+			<TextInput
 				style={styles.input}
-				keyboardType="numeric"
 				value={current.toString()}
 				onChangeText={(text) => setCurrent(Number(text))}
-			/> */}
+				editable={false}
+			/>
 		</View>
 	);
 }
@@ -69,6 +69,8 @@ const styles = StyleSheet.create({
 		tintColor: '#344e76',
 	},
 	input: {
+		fontFamily: 'monospace',
+		fontSize: 16,
 		borderWidth: 1,
 		borderColor: '#ccc',
 		padding: 10,

@@ -15,7 +15,7 @@ function useTimer(speed = 1) {
         const now = Date.now();
         setCurrentMillisecond((cm) => cm + (now - last) * speed);
         last = now;
-      }, 97);
+      }, 10);
       return () => window.clearInterval(timer);
     }
   }, [paused, speed]);
